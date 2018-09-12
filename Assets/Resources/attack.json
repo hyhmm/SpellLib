@@ -5,40 +5,34 @@
         {
             "Type": "SpellStart",
             "ID": 1,
-            "ValueOut": [
-            {
-                "Name": "SpellAgent",
-            }],
-            "FlowOut":
-            [
-            {
-                "Name":"Out",
-                "Node":2,
-                "ConnectPort":"In"
-            }],
+            "ValueOut": ["SpellAgent"],
+            "FlowOut": ["Out"]
         },
         {
             "ID": 2,
             "Type": "TakeDamage",
-            "ValueIn": [
-            {
-                "Name": "damage",
-                "Node": 0,
-                "ConnectPort": "Damage"
-            },
-            {
-                "Name": "target",
-                "Node": 1,
-                "ConnectPort": "SpellTarget"
-            }],
-            "FlowIn":[{
-                "Name":"In"
-            }]
+            "ValueIn": ["Damage", "Target"],
+            "FlowIn": ["In"]
         }],
-        "Blackboard":[{
-            "Name":"Damage",
-            "Type":"float",
-            "Value":2
+        "Blackboard": [
+        {
+            "Name": "Damage",
+            "Type": "float",
+            "Value": 2
+        }],
+        "ConnectFlow": [
+        {
+            "Source": 1,
+            "SourcePort": "Out",
+            "Target": 2,
+            "TargetPort": "In"
+        }],
+        "ConnectValue": [
+        {
+            "Source": 0,
+            "SourcePort": "Damage",
+            "Target": 2,
+            "TargetPort": "Damage"
         }]
     }
 }
