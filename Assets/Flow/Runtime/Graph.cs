@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -10,50 +10,63 @@ using System.Linq;
 public class Graph
 {
     public string Name;
-    public Blackboard Blackboard { get; private set; }    
+    public Blackboard Blackboard { get; private set; }
     Dictionary<int, Node> nodes = new Dictionary<int, Node>();
-    List<EventNode> eventNodes = new List<EventNode>();    
 
-    public bool Load(string name)
+    public bool LoadByFileName(string fileName)
     {
-        this.Name = name;
-        Blackboard = new Blackboard();
-        TextAsset ta = Resources.Load<TextAsset>(name);
-        JObject jobject = JObject.Parse(ta.text);
+        this.Name = Path.GetFileName(fileName);
+        TextAsset ta = Resources.Load<TextAsset>(fileName);
+        return Load(ta.text);
+    }
 
+    public bool Load(string content)
+    {
+        Blackboard = new Blackboard();
+        JObject jobject = JObject.Parse(content);
+
+        // 加载blackboard
         if (jobject["Graph"]["Blackboard"] != null)
         {
             Node node = new Node();
             Blackboard.Load(jobject["Graph"]["Blackboard"]);
-            nodes.Add(0, node);
             Blackboard.OnRegiserPort(node);
+            nodes.Add(0, node);
         }
 
         foreach (var jnode in jobject["Graph"]["Nodes"])
         {
             Node node = (Node)Activator.CreateInstance(Type.GetType((string)jnode["Type"]));
-            node.Init(this, jnode);
+            node.Load(this, jnode);
             nodes.Add(node.ID, node);
-
-            if (node is EventNode)
-                eventNodes.Add(node as EventNode);
         }
 
-        foreach (var node in nodes.Values)
+        if (jobject["Graph"]["ConnectFlow"] != null)
         {
-            //Debug.Log(node);
-            node.RegisterPort();
-          
+            foreach (var connect in jobject["Graph"]["ConnectFlow"])
+            {
+                Connection connection = new Connection(this);
+                connection.Connect(ConnectType.Flow, (int)connect["Source"], (string)connect["SourcePort"],
+                    (int)connect["Target"], (string)connect["TargetPort"]);
+            }
         }
-        foreach (var node in nodes.Values)
-            node.Load();
+
+        if (jobject["Graph"]["ConnectValue"] != null)
+        {
+            foreach (var connect in jobject["Graph"]["ConnectValue"])
+            {
+                Connection connection = new Connection(this);
+                connection.Connect(ConnectType.Value, (int)connect["Source"], (string)connect["SourcePort"],
+                    (int)connect["Target"], (string)connect["TargetPort"]);
+            }
+        }
 
         return true;
     }
 
     public string Save()
     {
-        
+
         return "";
     }
 
@@ -64,21 +77,5 @@ public class Graph
 
         Debug.LogErrorFormat("cant find node by id:{0}", id);
         return null;
-    }
-
-    public void Started(SpellAgent sa)
-    {
-        foreach (var node in eventNodes)
-        {
-            node.Started(sa);
-        }
-    }
-
-    public void Stoped(SpellAgent sa)
-    {
-        foreach (var node in eventNodes)
-        {
-            node.Stoped(sa);
-        }
     }
 }

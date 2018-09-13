@@ -10,25 +10,8 @@ public class SpellAgent : MonoBehaviour {
 
     public void Start()
     {
-        //Debug.Log("Load Graph");
         graph = new Graph();
         graph.Load(GraphName);
-        this.Started();
-    }
-
-    private void OnDestroy()
-    {
-        this.Stoped();
-    }
-
-    public void Started()
-    {
-        graph.Started(this);
-    }
-
-    public void Stoped()
-    {
-        graph.Stoped(this);
     }
 
     public void DispatchSpellStart()
