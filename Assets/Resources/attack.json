@@ -1,38 +1,42 @@
 {
-    "Graph":
+    "Nodes": [
     {
-        "Nodes": [
-        {
-            "Type": "SpellStart",
-            "ID": 1,
-            "ValueOut": ["SpellAgent"],
-            "FlowOut": ["Out"]
-        },
-        {
-            "ID": 2,
-            "Type": "TakeDamage",
-            "ValueIn": ["Damage", "Target"],
-            "FlowIn": ["In"]
-        }],
-        "Blackboard": [
+        "Type": "SpellStart",
+        "ID": 1,
+        "ValueOut": null,
+        "ValueIn": ["SpellAgent", "SpellTarget"],
+        "FlowOut": ["Out"],
+        "FlowIn": null
+    },
+    {
+        "Type": "TakeDamage",
+        "ID": 2,
+        "ValueOut": ["Damage", "Target"],
+        "ValueIn": null,
+        "FlowOut": ["out"],
+        "FlowIn": ["In"]
+    }],
+    "Blackboard":
+    {
+        "Values": [
         {
             "Name": "Damage",
-            "Type": "float",
             "Value": 2
-        }],
-        "ConnectFlow": [
-        {
-            "Source": 1,
-            "SourcePort": "Out",
-            "Target": 2,
-            "TargetPort": "In"
-        }],
-        "ConnectValue": [
-        {
-            "Source": 0,
-            "SourcePort": "Damage",
-            "Target": 2,
-            "TargetPort": "Damage"
         }]
-    }
+    },
+    "Connections": [
+    {
+        "Type": 0,
+        "Source": 1,
+        "SourcePort": "Out",
+        "Target": 2,
+        "TargetPort": "In"
+    },
+    {
+        "Type": 1,
+        "Source": 0,
+        "SourcePort": "Damage",
+        "Target": 2,
+        "TargetPort": "Damage"
+    }]
 }

@@ -1,17 +1,17 @@
 
 public class Connection
 {
-    ConnectType connectType;
+    public ConnectType connectType { get; private set; }
 
     private Graph graph;
 
-    Node sourceNode;
+    public Node sourceNode { get; private set; }
 
-    Port sourcePort;
+    public Port sourcePort { get; private set; }
 
-    Node targetNode;
+    public Node targetNode { get; private set; }
 
-    Port targetPort;
+    public Port targetPort { get; private set; }
 
     public Connection(Graph graph)
     {
@@ -24,8 +24,16 @@ public class Connection
 
         this.sourceNode = graph.GetNode(sourceId);
         this.targetNode = graph.GetNode(targetId);
-        sourcePort = sourceNode.GetFlowOut(sourcePortName);
-        targetPort = targetNode.GetFlowIn(targetPortName);
+        if (connectType == ConnectType.Flow)
+        {
+            sourcePort = sourceNode.GetFlowOut(sourcePortName);
+            targetPort = targetNode.GetFlowIn(targetPortName);
+        }
+        else
+        {
+            sourcePort = sourceNode.GetValueOutPort(sourcePortName);
+            targetPort = targetNode.GetValueInPort(targetPortName);
+        }
 
         sourcePort.Connection = this;
         targetPort.Connection = this;

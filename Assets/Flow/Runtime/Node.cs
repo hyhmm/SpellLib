@@ -8,39 +8,44 @@ using System.Linq;
 public class Node {
     public int ID;
     protected Graph graph;
-    protected JToken jnode;
     protected Blackboard blackboard;
     protected Dictionary<string, ValueOut> portValueOutDict = new Dictionary<string, ValueOut>();
     protected Dictionary<string, ValueIn> portValueInDict = new Dictionary<string, ValueIn>();
     protected Dictionary<string, FlowIn> flowInDict = new Dictionary<string, FlowIn>();
     protected Dictionary<string, FlowOut> flowOutDict = new Dictionary<string, FlowOut>();
-    public virtual void Load(Graph graph, JToken jnode)
+
+    public Dictionary<string, ValueOut> PortValueOutDict { get { return portValueOutDict; } private set { portValueOutDict = value; } }
+    public Dictionary<string, ValueIn> PortValueInDict { get { return portValueInDict; } private set { portValueInDict = value; } }
+    public Dictionary<string, FlowIn> FlowInDict { get { return flowInDict; } private set { flowInDict = value; } }
+    public Dictionary<string, FlowOut> FlowOutDict { get { return flowOutDict; } private set { flowOutDict = value; } }
+
+    public virtual void Load(Graph graph, SerNode sn)
     {
-        this.jnode = jnode;
         this.graph = graph;
         this.blackboard = graph.Blackboard;
-        this.ID = (int)jnode["ID"];
-        if (jnode["ValueIn"] != null)
+        this.ID = sn.ID;
+
+        if (sn.ValueIn != null)
         {
-            foreach (var jin in jnode["ValueIn"])
-                AddValueInPort((string)jin);
+            foreach (var jin in sn.ValueIn)
+                AddValueInPort(jin);
         }
 
-        if (jnode["ValueOut"] != null)
+        if (sn.ValueOut != null)
         {
-            foreach (var jout in jnode["ValueOut"])
-                AddValueOutPort((string)jout);
+            foreach (var jout in sn.ValueOut)
+                AddValueOutPort(jout);
         }
 
-        if (jnode["FlowIn"] != null)
+        if (sn.FlowIn != null)
         {
-            foreach (var fi in jnode["FlowIn"])
-                AddFlowIn((string)fi);
+            foreach (var fi in sn.FlowIn)
+                AddFlowIn(fi);
         }
 
-        if (jnode["FlowOut"] != null)
+        if (sn.FlowOut != null)
         {
-            foreach (var fo in jnode["FlowOut"])
+            foreach (var fo in sn.FlowOut)
                 AddFlowOut((string)fo);
         }
 

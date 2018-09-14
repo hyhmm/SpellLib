@@ -5,7 +5,7 @@ public delegate object ValueHandler();
 public delegate void FlowHandler();
 public class Port
 {
-    protected string name;
+    public string name;
 
     public Connection Connection;
 }

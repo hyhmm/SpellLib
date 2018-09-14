@@ -7,11 +7,14 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 
-public class Graph
+public partial class Graph
 {
     public string Name;
     public Blackboard Blackboard { get; private set; }
+    private Node blackboardNode;
     Dictionary<int, Node> nodes = new Dictionary<int, Node>();
+    public Dictionary<int, Node> Nodes { get { return nodes; } private set { nodes = value; } }
+    public List<Connection> Connections = new List<Connection>();
 
     public bool LoadByFileName(string fileName)
     {
@@ -23,55 +26,40 @@ public class Graph
     public bool Load(string content)
     {
         Blackboard = new Blackboard();
-        JObject jobject = JObject.Parse(content);
+        SerGraph sg = JsonConvert.DeserializeObject<SerGraph>(content);
 
         // 加载blackboard
-        if (jobject["Graph"]["Blackboard"] != null)
+        if (sg.Blackboard != null)
         {
-            Node node = new Node();
-            Blackboard.Load(jobject["Graph"]["Blackboard"]);
-            Blackboard.OnRegiserPort(node);
-            nodes.Add(0, node);
+            blackboardNode = new Node();
+            Blackboard.Load(sg.Blackboard);
+            Blackboard.OnRegiserPort(blackboardNode);
         }
 
-        foreach (var jnode in jobject["Graph"]["Nodes"])
+        foreach (var sn in sg.Nodes)
         {
-            Node node = (Node)Activator.CreateInstance(Type.GetType((string)jnode["Type"]));
-            node.Load(this, jnode);
+            Node node = (Node)Activator.CreateInstance(Type.GetType(sn.Type));
+            node.Load(this, sn);
             nodes.Add(node.ID, node);
         }
 
-        if (jobject["Graph"]["ConnectFlow"] != null)
+        foreach (var connect in sg.Connections)
         {
-            foreach (var connect in jobject["Graph"]["ConnectFlow"])
-            {
-                Connection connection = new Connection(this);
-                connection.Connect(ConnectType.Flow, (int)connect["Source"], (string)connect["SourcePort"],
-                    (int)connect["Target"], (string)connect["TargetPort"]);
-            }
-        }
-
-        if (jobject["Graph"]["ConnectValue"] != null)
-        {
-            foreach (var connect in jobject["Graph"]["ConnectValue"])
-            {
-                Connection connection = new Connection(this);
-                connection.Connect(ConnectType.Value, (int)connect["Source"], (string)connect["SourcePort"],
-                    (int)connect["Target"], (string)connect["TargetPort"]);
-            }
-        }
+            Connection connection = new Connection(this);
+            connection.Connect(connect.Type, connect.Source, connect.SourcePort, connect.Target, connect.TargetPort);
+            Connections.Add(connection);
+        }        
 
         return true;
     }
 
-    public string Save()
-    {
-
-        return "";
-    }
-
     public Node GetNode(int id)
     {
+        if (id == 0)
+        {
+            return blackboardNode;
+        }
+
         if (nodes.ContainsKey(id))
             return nodes[id];
 

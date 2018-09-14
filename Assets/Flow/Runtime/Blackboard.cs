@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 
 public class Blackboard {
     Dictionary<string, object> dataSource = new Dictionary<string, object>();
+    public Dictionary<string, object> DataSource { get { return dataSource; } private set { dataSource = value; } }
 
     public void OnRegiserPort(Node node)
     {
@@ -13,17 +14,11 @@ public class Blackboard {
             node.AddValueOutPort(data.Key, () => { return GetData(data.Key); });
         }
     }
-    public void Load(JToken jnode)
+    public void Load(SerBlackboard sb)
     {
-        foreach (var jn in jnode)
+        foreach (var value in sb.Values)
         {
-            string name = (string)jn["Name"];
-            string type = (string)jn["Type"];
-            string value = (string)jn["Value"];
-            if (type == "int")
-                this.AddData(name, int.Parse(value));
-            else if (type == "float")
-                this.AddData(name, float.Parse(value));
+            this.AddData(value.Name, value.Value);
         }
     }
 
