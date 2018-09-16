@@ -25,8 +25,9 @@ public class Test : MonoBehaviour {
         }
         Debug.Log(((JArray)sv1.Value)[1]);
         */
-        Graph graph = new Graph();
+        /*Graph graph = new Graph();
         graph.LoadByFileName("attack");
-        graph.Save();
+        graph.Save();*/
+        //Debug.Log(Application.dataPath);
     }
 }
