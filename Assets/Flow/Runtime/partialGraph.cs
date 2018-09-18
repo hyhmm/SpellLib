@@ -1,7 +1,9 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+
 partial class Node
 {
     public int X;
@@ -45,45 +47,113 @@ partial class Node
 
 partial class Blackboard
 {
-    public string GetShowValue(string key)
+    public class Data
     {
-        string ret = "";
-        object value = this[key];
-        Type type = value.GetType();
-        if (type.IsArray || typeof(IEnumerable).IsAssignableFrom(type))
+        public string Name;
+        public object Value;
+
+        private string strValue = null;
+        public string StrValue
         {
-            var v = (IEnumerable)value;
-            foreach (var iv in v)
+            get
             {
-                ret += iv + ",";
+                if (strValue == null)
+                    strValue = ToValueString(Value);
+                return strValue;
             }
-            return ret.Remove(ret.LastIndexOf(','));
+            set
+            {
+                if (strValue == value)
+                    return;
+
+                strValue = value;
+                Value = ToValue(strValue);
+            }
         }
-        else
+
+        public string ToValueString(object value)
         {
-            return value.ToString();
+            string ret = "";
+            System.Type type = value.GetType();
+            if (type.IsArray || typeof(IEnumerable).IsAssignableFrom(type))
+            {
+                var v = (IEnumerable)value;
+                foreach (var iv in v)
+                {
+                    ret += iv + ",";
+                }
+                return ret.Remove(ret.LastIndexOf(','));
+            }
+            else
+            {
+                return value.ToString();
+            }
+        }
+
+        public object ToValue(string strValue)
+        {
+            object value;
+            if (strValue.Contains(","))
+            {
+                if (strValue.Contains("."))
+                {
+                    value = Util.ConvertListItemsFromString<float>(strValue);
+                }
+                else
+                {
+                    value = Util.ConvertListItemsFromString<int>(strValue);
+                }
+            }
+            else
+            {
+                if (strValue.Contains("."))
+                    value = float.Parse(strValue);
+                else
+                    value = int.Parse(strValue);
+            }
+            return value;
         }
     }
 
-    public void SetShowValue(string key, string value)
+    List<Data> showDataList;
+    public List<Data> ShowDataList
     {
-        if (value.Contains(","))
+        get
         {
-            if (value.Contains("."))
+            if (showDataList == null)
             {
-                DataSource[key] = Util.ConvertListItemsFromString<float>(value);
+                showDataList = new List<Data>();
+                foreach (var itr in DataSource)
+                {
+                    showDataList.Add(new Data()
+                    {
+                        Name = itr.Key,
+                        Value = itr.Value
+                    });
+                }
             }
-            else
+            return showDataList;
+        }
+    }
+
+    public void AddShowData()
+    {
+        ShowDataList.Add(new Data()
+        {
+            Name = GetNewName("New"),
+            Value = 0
+        });
+    }
+
+    string GetNewName(string name)
+    {
+        foreach (var data in this.ShowDataList)
+        {
+            if (data.Name == name)
             {
-                DataSource[key] = Util.ConvertListItemsFromString<int>(value);
+                return GetNewName(name + "1");
             }
         }
-        else
-        {
-            if (value.Contains("."))
-                DataSource[key] = float.Parse(value);
-            else
-                DataSource[key] = int.Parse(value);
-        }
+        return name;
     }
 }

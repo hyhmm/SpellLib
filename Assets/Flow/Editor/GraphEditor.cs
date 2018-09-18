@@ -199,6 +199,7 @@ public class GraphEditor : EditorWindow
         GUI.backgroundColor = new Color(0.8f, 0.8f, 1);
         if (GUILayout.Button("Add Variable"))
         {
+            blackboard.AddShowData();
             Event.current.Use();
         }
         GUI.backgroundColor = Color.white;
@@ -218,22 +219,18 @@ public class GraphEditor : EditorWindow
         
             GUILayout.BeginVertical();
 
-            foreach (var key in blackboard.DataSource.Keys.ToArray())
+            for (int i = blackboard.ShowDataList.Count - 1; i >= 0; i--)
             {
+                var data = blackboard.ShowDataList[i];
                 GUILayout.BeginHorizontal();
 
+                data.Name = EditorGUILayout.DelayedTextField(data.Name, layoutOptions);
 
-                string name = EditorGUILayout.DelayedTextField(key, layoutOptions);
+                data.StrValue = EditorGUILayout.DelayedTextField(data.StrValue, layoutOptions);
 
-                string showValue = blackboard.GetShowValue(key);
-                string value = EditorGUILayout.DelayedTextField(showValue, layoutOptions);
-
-                if (name != key || value != showValue)
-                    blackboard.SetShowValue(name, value);
-
-                if (GUILayout.Button("-") || key != name)
+                if (GUILayout.Button("-"))
                 {
-                    blackboard.DataSource.Remove(key);
+                    blackboard.ShowDataList.RemoveAt(i);
                 }
 
                 GUILayout.EndHorizontal();
