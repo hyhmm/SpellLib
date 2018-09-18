@@ -13,39 +13,12 @@ public class SerNode
     public int X;
     public int Y;
 
-    [JsonIgnore]
-    public float Width;
-    [JsonIgnore]
-    public float Height;
-
     public string Type;
     public int ID;
     public List<string> ValueOut;
     public List<string> ValueIn;
     public List<string> FlowOut;
     public List<string> FlowIn;
-
-    public Rect Rect
-    {
-        get { return new Rect(X, Y, Width, Height); }
-        set
-        {
-            X = (int)value.x;
-            Y = (int)value.y;
-            Width = value.width;
-            Height = value.height;
-        }
-    }
-
-    public int FlowCount
-    {
-        get { return System.Math.Max(FlowIn == null ? 0 : FlowIn.Count, FlowOut == null ? 0 : FlowOut.Count); }
-    }
-
-    public int PortCount
-    {
-        get { return System.Math.Max(ValueOut == null ? 0 : ValueOut.Count, ValueIn == null ? 0 : ValueIn.Count); }
-    }
 
     public void Init(Node node)
     {
@@ -75,15 +48,7 @@ public class SerNode
             FlowOut = new List<string>();
             FlowOut.AddRange(node.FlowOutDict.Keys);
         }
-    }
-
-    public int DefaultWidth { get { return 100; } }
-    public int DefaultHeight {
-        get
-        {
-            return (FlowCount + PortCount) * 30;
-        }
-    }
+    }   
 }
 
 public class SerValue

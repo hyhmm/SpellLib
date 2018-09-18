@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
 
-public class Blackboard {
+public partial class Blackboard {
     Dictionary<string, object> dataSource = new Dictionary<string, object>();
     public Dictionary<string, object> DataSource { get { return dataSource; } private set { dataSource = value; } }
 

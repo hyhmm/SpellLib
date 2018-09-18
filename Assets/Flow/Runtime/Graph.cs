@@ -23,14 +23,12 @@ public partial class Graph
         return Load(ta.text);
     }
 
-    public bool Load(string content)
+    public bool Load(SerGraph sg)
     {
-        Blackboard = new Blackboard();
-        SerGraph sg = JsonConvert.DeserializeObject<SerGraph>(content);
-
         // 加载blackboard
         if (sg.Blackboard != null)
         {
+            Blackboard = new Blackboard();
             blackboardNode = new Node();
             Blackboard.Load(sg.Blackboard);
             Blackboard.OnRegiserPort(blackboardNode);
@@ -48,9 +46,17 @@ public partial class Graph
             Connection connection = new Connection(this);
             connection.Connect(connect.Type, connect.Source, connect.SourcePort, connect.Target, connect.TargetPort);
             Connections.Add(connection);
-        }        
+        }
 
         return true;
+    }
+
+    public bool Load(string content)
+    {
+        Blackboard = new Blackboard();
+        SerGraph sg = JsonConvert.DeserializeObject<SerGraph>(content);
+
+        return Load(sg);
     }
 
     public Node GetNode(int id)

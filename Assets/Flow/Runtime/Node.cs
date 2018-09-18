@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 
-public class Node {
+public partial class Node {
     public int ID;
     protected Graph graph;
     protected Blackboard blackboard;
@@ -24,6 +24,8 @@ public class Node {
         this.graph = graph;
         this.blackboard = graph.Blackboard;
         this.ID = sn.ID;
+        this.X = sn.X;
+        this.Y = sn.Y;
 
         if (sn.ValueIn != null)
         {

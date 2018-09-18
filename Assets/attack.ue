@@ -26,6 +26,9 @@
         {
             "Name": "Damage",
             "Value": 2
+        }, {
+        "Name":"Test",
+        "Value":[2,3,4]
         }]
     },
     "Connections": [
@@ -38,8 +41,8 @@
     },
     {
         "Type": 1,
-        "Source": 0,
-        "SourcePort": "Damage",
+        "Source": 1,
+        "SourcePort": "SpellAgent",
         "Target": 2,
         "TargetPort": "Damage"
     },

@@ -5,10 +5,15 @@ using UnityEngine;
 using UnityEditor.Callbacks;
 using System.IO;
 using Newtonsoft.Json;
+using System.Linq;
 
 public class GraphEditor : EditorWindow
 {
-    static SerGraph serGraph;
+    private static GUILayoutOption[] layoutOptions = new GUILayoutOption[] { GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true), GUILayout.Height(16) };
+
+    Dictionary<Port, Rect> PortPos = new Dictionary<Port, Rect>();
+
+    static Graph graph;
 
     [OnOpenAssetAttribute(0)]
     public static bool OnOpen(int instanceID, int line)
@@ -17,8 +22,10 @@ public class GraphEditor : EditorWindow
         if (path.EndsWith(".ue"))
         {
             path = Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, path);
-            string data = FileUtil.ReadTextFile(path);
-            serGraph = JsonConvert.DeserializeObject<SerGraph>(data);
+            string data = Util.ReadTextFile(path);
+            SerGraph sg = JsonConvert.DeserializeObject<SerGraph>(data);
+            graph = new Graph();
+            graph.Load(sg);
             GetWindow<GraphEditor>();
             return true;
         }
@@ -27,7 +34,7 @@ public class GraphEditor : EditorWindow
 
     private void OnGUI()
     {
-        if (serGraph == null)
+        if (graph == null)
             return;
 
         DrawGrid();
@@ -36,17 +43,19 @@ public class GraphEditor : EditorWindow
         DrawBlackboard();
     }
 
+
+    #region Node
     void DrawNodes()
     {
         BeginWindows();
-        foreach (var node in serGraph.Nodes)
+        foreach (var node in graph.Nodes.Values)
         {
             DrawNode(node);
         }
         EndWindows();
     }
 
-    void DrawNode(SerNode node)
+    void DrawNode(Node node)
     {
         GUI.color = Color.white;
         var rect = GUILayout.Window(node.ID, new Rect(node.X, node.Y, node.DefaultWidth, node.DefaultHeight),(id) => { NodeWindowGUI(id, node); }, string.Empty, CanvasStyles.window);
@@ -56,80 +65,9 @@ public class GraphEditor : EditorWindow
         GUI.Box(new Rect(rect.x + 6, rect.y + 6, rect.width, rect.height), string.Empty, CanvasStyles.windowShadow);
     }
 
-    void DrawConnections()
+    void NodeWindowGUI(int id, Node node)
     {
-        const float startOffset = 35;
-        const float portHeight = 18;
-
-        Dictionary<SerPort, Vector2> PortPos = new Dictionary<SerPort, Vector2>();
-        foreach (var node in serGraph.Nodes)
-        {
-            int flowCount = node.FlowCount;
-            if (node.FlowIn != null)
-            {
-                for (int i = 0; i < node.FlowIn.Count; i++)
-                {
-                    Rect rect = new Rect(0, 0, 10, 10);
-                    rect.position = new Vector2(node.X-15, node.Y + i* portHeight + startOffset);
-                    GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
-                    PortPos.Add(new SerPort() { NodeId = node.ID, Port = node.FlowIn[i] }, rect.position);
-                }
-            }
-
-            if (node.FlowOut != null)
-            {
-                for (int i = 0; i < node.FlowOut.Count; i++)
-                {
-                    Rect rect = new Rect(0, 0, 10, 10);
-                    rect.position = new Vector2(node.X + node.Width+5, node.Y + i * portHeight + startOffset);
-                    GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
-                    PortPos.Add(new SerPort() { NodeId = node.ID, Port = node.FlowOut[i] }, rect.position);
-                }
-            }
-
-            if (node.ValueIn != null)
-            {
-                for (int i = 0; i < node.ValueIn.Count; i++)
-                {
-                    Rect rect = new Rect(0, 0, 10, 10);
-                    rect.position = new Vector2(node.X - 15, node.Y + (i + flowCount) * portHeight + startOffset);
-                    GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
-                    PortPos.Add(new SerPort() { NodeId = node.ID, Port = node.ValueIn[i] }, rect.position);
-                }
-            }
-
-            if (node.ValueOut != null)
-            {
-                for (int i = 0; i < node.ValueOut.Count; i++)
-                {
-                    Rect rect = new Rect(0, 0, 10, 10);
-                    rect.position = new Vector2(node.X + node.Width + 5, node.Y + (i + flowCount) * portHeight + startOffset);
-                    GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
-                    PortPos.Add(new SerPort() { NodeId = node.ID, Port = node.ValueOut[i] }, rect.position);
-                }
-            }
-        }
-
-        foreach (var connect in serGraph.Connections)
-        {
-            if (connect.Source == 0)
-                continue;
-            var startPos = PortPos[new SerPort() { NodeId = connect.Source, Port = connect.SourcePort }] + new Vector2(5, 5);
-            var endPos = PortPos[new SerPort() { NodeId = connect.Target, Port = connect.TargetPort }] + new Vector2(5, 5);
-
-            var xDiff = (startPos.x - endPos.x) * 0.8f;
-            xDiff = startPos.x > endPos.x ? xDiff : -xDiff;
-            var tangA = new Vector2(xDiff, 0);
-            var tangB = tangA * -1;
-
-            Color color = connect.Type == ConnectType.Flow ? new Color(0.5f, 0.5f, 0.8f, 0.8f) : new Color(0.3f, 0.3f, 0.3f, 1f);
-            Handles.DrawBezier(startPos, endPos, startPos + tangA, endPos + tangB, color, null, 3);
-        }
-    }
-
-    void NodeWindowGUI(int id, SerNode node)
-    {
-        var text = string.Format("<b><size=12><color=#{0}>{1}</color></size></b>", "eed9a7", node.Type);
+        var text = string.Format("<b><size=12><color=#{0}>{1}</color></size></b>", "eed9a7", node.GetType().ToString());
         var content = new GUIContent(text, "node");
         GUILayout.Label(content, CanvasStyles.nodeTitle, GUILayout.MaxHeight(23));
 
@@ -138,57 +76,118 @@ public class GraphEditor : EditorWindow
         {
             GUILayout.BeginVertical();
             {
+                // flowIn
+                var flowIns = node.FlowInDict.Values.ToArray();
                 for (int i = 0; i < flowCount; i++)
                 {
-                    if (node.FlowIn != null && i < flowCount)
-                        GUILayout.Label(string.Format("<b>► {0}</b>", node.FlowIn[i]), Styles.leftLabel);
+                    if (i < flowIns.Count())
+                        GUILayout.Label(string.Format("<b>► {0}</b>", flowIns[i].name), Styles.leftLabel);
                     else
                         GUILayout.Label("");
                 }
 
-                if (node.ValueIn != null)
+                // valueIn
+                foreach (var valueIn in node.PortValueInDict.Values)
                 {
-                    foreach (var valueIn in node.ValueIn)
-                    {
-                        GUILayout.Label(valueIn, Styles.leftLabel);
-                    }
+                    GUILayout.Label(valueIn.name, Styles.leftLabel);
                 }
-                GUILayout.EndVertical();
             }
-
-            GUILayout.BeginVertical();
-            {
-                for (int i = 0; i < flowCount; i++)
-                {
-                    if (node.FlowOut != null && i < node.FlowOut.Count)
-                        GUILayout.Label(string.Format("<b>{0} ►</b>", node.FlowOut[i]), Styles.rightLabel);
-                    else
-                        GUILayout.Label("");
-                }
-                if (node.ValueOut != null)
-                {
-                    foreach (var valueOut in node.ValueOut)
-                    {
-                        Debug.Log(valueOut);
-                        GUILayout.Label(valueOut, Styles.rightLabel);
-                    }
-                }
                 GUILayout.EndVertical();
-            }
-            GUILayout.EndHorizontal();
         }
 
-    }
+        GUILayout.BeginVertical();
+        {
+            // flowOut
+            var flowOuts = node.PortValueOutDict.Values.ToArray();
+            for (int i = 0; i < flowCount; i++)
+            {
+                if ( i < flowOuts.Count())
+                    GUILayout.Label(string.Format("<b>{0} ►</b>", flowOuts[i].name), Styles.rightLabel);
+                else
+                    GUILayout.Label("");
+            }
 
-    void DrawFlowIn(string flowIn)
+            // valueOut
+            foreach (var valueOut in node.PortValueOutDict.Values)
+            {
+                GUILayout.Label(valueOut.name, Styles.rightLabel);
+            }
+
+            GUILayout.EndVertical();
+        }
+        GUILayout.EndHorizontal();
+    }
+    #endregion
+
+    #region Connection
+    void DrawConnections()
     {
-      
-    }
+        const float startOffset = 35;
+        const float portHeight = 18;
 
-    private static GUILayoutOption[] layoutOptions = new GUILayoutOption[] { GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true), GUILayout.Height(16) };
+        PortPos.Clear();
+
+        foreach (var node in graph.Nodes.Values)
+        {
+            int flowCount = node.FlowCount;
+
+            var flowIns = node.FlowInDict.Values.ToArray();
+            for (int i = 0; i < flowIns.Count(); i++)
+            {
+                Rect rect = new Rect(0, 0, 10, 10);
+                rect.position = new Vector2(node.X - 15, node.Y + i * portHeight + startOffset);
+                GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
+                PortPos.Add(flowIns[i], rect);
+            }
+
+            var flowOuts = node.FlowOutDict.Values.ToArray();
+            for (int i = 0; i < flowOuts.Count(); i++)
+            {
+                Rect rect = new Rect(0, 0, 10, 10);
+                rect.position = new Vector2(node.X + node.Width + 5, node.Y + i * portHeight + startOffset);
+                GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
+                PortPos.Add(flowOuts[i], rect);
+            }
+
+            var valueIns = node.PortValueInDict.Values.ToArray();
+            for (int i = 0; i < valueIns.Count(); i++)
+            {
+                Rect rect = new Rect(0, 0, 10, 10);
+                rect.position = new Vector2(node.X - 15, node.Y + (i + flowCount) * portHeight + startOffset);
+                GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
+                PortPos.Add(valueIns[i], rect);
+            }
+
+            var valueOuts = node.PortValueOutDict.Values.ToArray();
+            for (int i = 0; i < valueOuts.Count(); i++)
+            {
+                Rect rect = new Rect(0, 0, 10, 10);
+                rect.position = new Vector2(node.X + node.Width + 5, node.Y + (i + flowCount) * portHeight + startOffset);
+                GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
+                PortPos.Add(valueOuts[i], rect);
+            }
+        }
+
+        foreach (var connect in graph.Connections)
+        {
+            var startPos = PortPos[connect.sourcePort].center;
+            var endPos = PortPos[connect.targetPort].center;
+
+            var xDiff = (startPos.x - endPos.x) * 0.8f;
+            xDiff = startPos.x > endPos.x ? xDiff : -xDiff;
+            var tangA = new Vector2(xDiff, 0);
+            var tangB = tangA * -1;
+
+            Color color = connect.connectType == ConnectType.Flow ? new Color(0.5f, 0.5f, 0.8f, 0.8f) : new Color(0.3f, 0.3f, 0.3f, 1f);
+            Handles.DrawBezier(startPos, endPos, startPos + tangA, endPos + tangB, color, null, 3);
+        }
+    }
+    #endregion
+
+    #region Blackboard
     void DrawBlackboard()
     {
-        SerBlackboard serBlackboard = serGraph.Blackboard;
+        Blackboard blackboard = graph.Blackboard;
         Rect rect = new Rect(position.width - 300, 30, 280, 300);
         GUI.Box(rect, string.Empty, CanvasStyles.windowShadow);
         GUI.color = Color.white;
@@ -204,7 +203,7 @@ public class GraphEditor : EditorWindow
         }
         GUI.backgroundColor = Color.white;
 
-        if (serBlackboard.Values.Count == 0)
+        if (blackboard.DataSource.Count == 0)
         {
             EditorGUILayout.HelpBox("Blackboard has no variables", MessageType.Info);
         }
@@ -216,24 +215,25 @@ public class GraphEditor : EditorWindow
             GUILayout.Label("Value", layoutOptions);
             GUI.color = Color.white;
             GUILayout.EndHorizontal();
-        }
-
-        if (serBlackboard.Values.Count > 0)
-        {
+        
             GUILayout.BeginVertical();
 
-            foreach (var value in serBlackboard.Values.ToArray())
+            foreach (var key in blackboard.DataSource.Keys.ToArray())
             {
                 GUILayout.BeginHorizontal();
 
 
-                value.Name = EditorGUILayout.DelayedTextField(value.Name, layoutOptions);
+                string name = EditorGUILayout.DelayedTextField(key, layoutOptions);
 
-                value.Value = EditorGUILayout.DelayedTextField(value.Value.ToString(), layoutOptions);
+                string showValue = blackboard.GetShowValue(key);
+                string value = EditorGUILayout.DelayedTextField(showValue, layoutOptions);
 
-                if (GUILayout.Button("-"))
+                if (name != key || value != showValue)
+                    blackboard.SetShowValue(name, value);
+
+                if (GUILayout.Button("-") || key != name)
                 {
-                    serBlackboard.Values.Remove(value);
+                    blackboard.DataSource.Remove(key);
                 }
 
                 GUILayout.EndHorizontal();
@@ -241,10 +241,12 @@ public class GraphEditor : EditorWindow
             GUILayout.EndVertical();
             
         }
-        //EditorUtils.EndOfInspector();
+        
         GUILayout.EndArea();
     }
+    #endregion
 
+    #region Background
     void DrawGrid()
     {
         if (Event.current.type != EventType.Repaint)
@@ -271,4 +273,5 @@ public class GraphEditor : EditorWindow
             Handles.DrawLine(new Vector3(0, i, 0), new Vector3(position.width, i, 0));
         }
     }
+    #endregion
 }
