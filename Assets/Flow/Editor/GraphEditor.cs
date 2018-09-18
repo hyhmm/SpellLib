@@ -218,6 +218,29 @@ public class GraphEditor : EditorWindow
             GUILayout.EndHorizontal();
         }
 
+        if (serBlackboard.Values.Count > 0)
+        {
+            GUILayout.BeginVertical();
+
+            foreach (var value in serBlackboard.Values.ToArray())
+            {
+                GUILayout.BeginHorizontal();
+
+
+                value.Name = EditorGUILayout.DelayedTextField(value.Name, layoutOptions);
+
+                value.Value = EditorGUILayout.DelayedTextField(value.Value.ToString(), layoutOptions);
+
+                if (GUILayout.Button("-"))
+                {
+                    serBlackboard.Values.Remove(value);
+                }
+
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
+            
+        }
         //EditorUtils.EndOfInspector();
         GUILayout.EndArea();
     }
