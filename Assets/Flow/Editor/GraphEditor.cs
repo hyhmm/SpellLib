@@ -39,6 +39,8 @@ public class GraphEditor : EditorWindow
         if (graph == null)
             return;
 
+        Controls();
+
         DrawGrid();
         DrawNodes();
         DrawConnections();
@@ -282,6 +284,43 @@ public class GraphEditor : EditorWindow
         {
             string data = graph.Serialize();
             Util.WriteTextFile(filePath, data);
+        }
+    }
+    #endregion
+
+    #region Controls
+    private bool IsDraggingNode { get { return draggedNode != null; } }
+    private bool IsDraggingPort { get { return draggedOutput != null; } }
+    private bool IsHoveringPort { get { return hoveredPort != null; } }
+    private bool IsHoveringNode { get { return hoveredNode != null; } }
+    private bool HasSelectedNode { get { return selectedNode != null; } }
+
+    private Node hoveredNode = null;
+    private Node selectedNode = null;
+    private Node draggedNode = null;
+    private Port hoveredPort = null;
+    private Port draggedOutput = null;
+    private Port draggedOutputTarget = null;
+
+    public void Controls()
+    {
+        Event e = Event.current;
+        switch (e.type)
+        {
+            case EventType.MouseMove:
+                break;
+            case EventType.ScrollWheel:
+                break;
+            case EventType.MouseDrag:
+                if (e.button == 0)
+                {
+
+                }
+                else
+                {
+
+                }
+                break;
         }
     }
     #endregion
