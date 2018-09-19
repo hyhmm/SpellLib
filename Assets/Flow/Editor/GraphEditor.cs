@@ -15,13 +15,15 @@ public class GraphEditor : EditorWindow
 
     static Graph graph;
 
+    static string filePath;
+
     [OnOpenAssetAttribute(0)]
     public static bool OnOpen(int instanceID, int line)
     {
         string path = AssetDatabase.GetAssetPath(EditorUtility.InstanceIDToObject(instanceID));
         if (path.EndsWith(".ue"))
         {
-            path = Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, path);
+            filePath = Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, path);
             string data = Util.ReadTextFile(path);
             SerGraph sg = JsonConvert.DeserializeObject<SerGraph>(data);
             graph = new Graph();
@@ -41,6 +43,7 @@ public class GraphEditor : EditorWindow
         DrawNodes();
         DrawConnections();
         DrawBlackboard();
+        DrawToolbar();
     }
 
 
@@ -271,4 +274,16 @@ public class GraphEditor : EditorWindow
         }
     }
     #endregion
+
+    #region Toolbar
+    void DrawToolbar()
+    {
+        if (GUILayout.Button("Save", EditorStyles.toolbarButton, GUILayout.Width(50)))
+        {
+            string data = graph.Serialize();
+            Util.WriteTextFile(filePath, data);
+        }
+    }
+    #endregion
+
 }

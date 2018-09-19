@@ -1,56 +1,77 @@
-{
-    "Nodes": [
+﻿{
+  "Nodes": [
     {
-        "Type": "SpellStart",
-        "ID": 1,
-        "X":50,
-        "Y":50,
-        "ValueIn": null,
-        "ValueOut": ["SpellAgent", "SpellTarget"],
-        "FlowOut": ["Out"],
-        "FlowIn": null
+      "X": 100,
+      "Y": 100,
+      "Type": "SpellStart",
+      "ID": 1,
+      "ValueOut": [
+        "SpellAgent",
+        "SpellTarget"
+      ],
+      "ValueIn": [
+        "SpellAgent",
+        "SpellTarget"
+      ],
+      "FlowOut": [
+        "Out"
+      ],
+      "FlowIn": null
     },
     {
-        "Type": "TakeDamage",
-        "ID": 2,
-        "X":200,
-        "Y":200,
-        "ValueIn": ["Damage", "Target"],
-        "ValueOut": null,
-        "FlowOut": ["out"],
-        "FlowIn": ["In"]
-    }],
-    "Blackboard":
+      "X": 600,
+      "Y": 300,
+      "Type": "TakeDamage",
+      "ID": 2,
+      "ValueOut": [
+        "Target",
+        "Damage"
+      ],
+      "ValueIn": [
+        "Damage",
+        "Target"
+      ],
+      "FlowOut": [
+        "out"
+      ],
+      "FlowIn": [
+        "In"
+      ]
+    }
+  ],
+  "Blackboard": {
+    "Values": [
+      {
+        "Name": "Damage",
+        "Value": 2
+      },
+      {
+        "Name": "New",
+        "Value": 0
+      }
+    ]
+  },
+  "Connections": [
     {
-        "Values": [
-        {
-            "Name": "Damage",
-            "Value": 2
-        }, {
-        "Name":"Test",
-        "Value":[2,3,4]
-        }]
+      "Type": 0,
+      "Source": 1,
+      "SourcePort": "Out",
+      "Target": 2,
+      "TargetPort": "In"
     },
-    "Connections": [
     {
-        "Type": 0,
-        "Source": 1,
-        "SourcePort": "Out",
-        "Target": 2,
-        "TargetPort": "In"
+      "Type": 1,
+      "Source": 1,
+      "SourcePort": "SpellAgent",
+      "Target": 2,
+      "TargetPort": "Damage"
     },
     {
-        "Type": 1,
-        "Source": 1,
-        "SourcePort": "SpellAgent",
-        "Target": 2,
-        "TargetPort": "Damage"
-    },
-    {
-        "Type": 1,
-        "Source": 1,
-        "SourcePort": "SpellTarget",
-        "Target": 2,
-        "TargetPort": "Target"
-    },]
+      "Type": 1,
+      "Source": 1,
+      "SourcePort": "SpellTarget",
+      "Target": 2,
+      "TargetPort": "Target"
+    }
+  ]
 }

@@ -24,7 +24,8 @@ public class SerNode
     {
         ID = node.ID;
         Type = node.GetType().ToString();
-
+        X = node.X;
+        Y = node.Y;
         if (node.PortValueInDict.Count > 0)
         {
             ValueOut = new List<string>();
@@ -63,12 +64,12 @@ public class SerBlackboard
 
     public void Init(Blackboard blackboard)
     {
-        if (blackboard.DataSource.Count > 0)
+        if (blackboard.ShowDataList.Count > 0)
         {
-            foreach (var iter in blackboard.DataSource)
+            foreach (var iter in blackboard.ShowDataList)
             {
                 SerValue sv = new SerValue();
-                sv.Name = iter.Key;
+                sv.Name = iter.Name;
                 sv.Value = iter.Value;
                 Values.Add(sv);
             }
@@ -148,12 +149,10 @@ public partial class Graph
 
     }
 
-
-    public void Save()
+    public string Serialize()
     {
         SerGraph sg = new SerGraph();
         sg.Init(this);
-        string data = JsonConvert.SerializeObject(sg);
-        CreatePersisitentFile("test.json", data);
+        return JsonConvert.SerializeObject(sg, Formatting.Indented);
     }
 }
