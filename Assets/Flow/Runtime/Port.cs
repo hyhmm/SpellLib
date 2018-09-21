@@ -7,7 +7,9 @@ public class Port
 {
     public string name;
 
-    public Connection Connection;
+    public List<Connection> Connections = new List<Connection>();
+
+    public bool IsConnected { get { return Connections.Count > 0; } }
 }
 
 public class ValueIn : Port
@@ -19,7 +21,7 @@ public class ValueIn : Port
 
     public object Value
     {
-        get { return Connection.Value; }
+        get { return Connections[0].Value; }
     }
 }
 
@@ -71,7 +73,8 @@ public class FlowOut : Port
 
     public void Call()
     {
-        Connection.Call();
+        for (int i = 0; i < Connections.Count; i++)
+            Connections[i].Call();
     }
 }
 

@@ -17,6 +17,17 @@ public class GraphEditor : EditorWindow
 
     static string filePath;
 
+    [MenuItem("Tools/SaveEditor %w")] // ctrl + w
+    public static void Save()
+    {
+        Debug.Log("Save");
+        if (graph == null)
+            return;
+
+        string data = graph.Serialize();
+        Util.WriteTextFile(filePath, data);
+    }
+
     [OnOpenAssetAttribute(0)]
     public static bool OnOpen(int instanceID, int line)
     {
@@ -44,12 +55,12 @@ public class GraphEditor : EditorWindow
         DrawGrid();
         DrawNodes();
         DrawConnections();
+        DrawDraggedConnection();
         DrawBlackboard();
         DrawToolbar();
     }
 
-
-    #region Node
+#region Node
     void DrawNodes()
     {
         BeginWindows();
@@ -63,8 +74,10 @@ public class GraphEditor : EditorWindow
     void DrawNode(Node node)
     {
         GUI.color = Color.white;
-        var rect = GUILayout.Window(node.ID, new Rect(node.X, node.Y, node.DefaultWidth, node.DefaultHeight),(id) => { NodeWindowGUI(id, node); }, string.Empty, CanvasStyles.window);
+        var rect = GUILayout.Window(node.ID, new Rect(node.X, node.Y, node.DefaultWidth, node.DefaultHeight),
+            (id) => { NodeWindowGUI(id, node); }, string.Empty, CanvasStyles.window);       
         node.Rect = rect;
+
         GUI.Box(rect, string.Empty, CanvasStyles.windowShadow);
         GUI.color = new Color(1, 1, 1, 0.5f);
         GUI.Box(new Rect(rect.x + 6, rect.y + 6, rect.width, rect.height), string.Empty, CanvasStyles.windowShadow);
@@ -103,7 +116,7 @@ public class GraphEditor : EditorWindow
         GUILayout.BeginVertical();
         {
             // flowOut
-            var flowOuts = node.PortValueOutDict.Values.ToArray();
+            var flowOuts = node.FlowOutDict.Values.ToArray();
             for (int i = 0; i < flowCount; i++)
             {
                 if ( i < flowOuts.Count())
@@ -121,6 +134,8 @@ public class GraphEditor : EditorWindow
             GUILayout.EndVertical();
         }
         GUILayout.EndHorizontal();
+
+        GUI.DragWindow();
     }
     #endregion
 
@@ -139,36 +154,40 @@ public class GraphEditor : EditorWindow
             var flowIns = node.FlowInDict.Values.ToArray();
             for (int i = 0; i < flowIns.Count(); i++)
             {
+                var port = flowIns[i]; 
                 Rect rect = new Rect(0, 0, 10, 10);
                 rect.position = new Vector2(node.X - 15, node.Y + i * portHeight + startOffset);
-                GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
+                GUI.Box(rect, string.Empty, port.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
                 PortPos.Add(flowIns[i], rect);
             }
 
             var flowOuts = node.FlowOutDict.Values.ToArray();
             for (int i = 0; i < flowOuts.Count(); i++)
             {
+                var port = flowOuts[i];
                 Rect rect = new Rect(0, 0, 10, 10);
                 rect.position = new Vector2(node.X + node.Width + 5, node.Y + i * portHeight + startOffset);
-                GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
+                GUI.Box(rect, string.Empty, port.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
                 PortPos.Add(flowOuts[i], rect);
             }
 
             var valueIns = node.PortValueInDict.Values.ToArray();
             for (int i = 0; i < valueIns.Count(); i++)
             {
+                var port = valueIns[i];
                 Rect rect = new Rect(0, 0, 10, 10);
                 rect.position = new Vector2(node.X - 15, node.Y + (i + flowCount) * portHeight + startOffset);
-                GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
+                GUI.Box(rect, string.Empty, port.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
                 PortPos.Add(valueIns[i], rect);
             }
 
             var valueOuts = node.PortValueOutDict.Values.ToArray();
             for (int i = 0; i < valueOuts.Count(); i++)
             {
+                var port = valueOuts[i];
                 Rect rect = new Rect(0, 0, 10, 10);
                 rect.position = new Vector2(node.X + node.Width + 5, node.Y + (i + flowCount) * portHeight + startOffset);
-                GUI.Box(rect, string.Empty, CanvasStyles.nodePortConnected);
+                GUI.Box(rect, string.Empty, port.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
                 PortPos.Add(valueOuts[i], rect);
             }
         }
@@ -177,14 +196,30 @@ public class GraphEditor : EditorWindow
         {
             var startPos = PortPos[connect.sourcePort].center;
             var endPos = PortPos[connect.targetPort].center;
-
-            var xDiff = (startPos.x - endPos.x) * 0.8f;
-            xDiff = startPos.x > endPos.x ? xDiff : -xDiff;
-            var tangA = new Vector2(xDiff, 0);
-            var tangB = tangA * -1;
-
             Color color = connect.connectType == ConnectType.Flow ? new Color(0.5f, 0.5f, 0.8f, 0.8f) : new Color(0.3f, 0.3f, 0.3f, 1f);
-            Handles.DrawBezier(startPos, endPos, startPos + tangA, endPos + tangB, color, null, 3);
+            DrawConnection(startPos, endPos, color);
+        }
+    }
+
+    void DrawConnection(Vector2 startPos, Vector2 endPos, Color color)
+    {
+        var xDiff = (startPos.x - endPos.x) * 0.8f;
+        xDiff = startPos.x > endPos.x ? xDiff : -xDiff;
+        var tangA = new Vector2(xDiff, 0);
+        var tangB = tangA * -1;
+        Handles.DrawBezier(startPos, endPos, startPos + tangA, endPos + tangB, color, null, 3);
+
+    }
+
+    void DrawDraggedConnection()
+    {
+        if (IsDraggingPort)
+        {
+            var from = PortPos[draggedPort].center;
+            var to = Event.current.mousePosition;
+            Color color = (draggedPort is FlowIn || draggedPort is FlowOut) ? new Color(0.5f, 0.5f, 0.8f, 0.8f) : new Color(0.3f, 0.3f, 0.3f, 1f);
+            DrawConnection(from, to, color);
+            Repaint();
         }
     }
     #endregion
@@ -282,25 +317,17 @@ public class GraphEditor : EditorWindow
     {
         if (GUILayout.Button("Save", EditorStyles.toolbarButton, GUILayout.Width(50)))
         {
-            string data = graph.Serialize();
-            Util.WriteTextFile(filePath, data);
+            Save();
         }
     }
     #endregion
 
     #region Controls
     private bool IsDraggingNode { get { return draggedNode != null; } }
-    private bool IsDraggingPort { get { return draggedOutput != null; } }
-    private bool IsHoveringPort { get { return hoveredPort != null; } }
-    private bool IsHoveringNode { get { return hoveredNode != null; } }
-    private bool HasSelectedNode { get { return selectedNode != null; } }
+    private bool IsDraggingPort { get { return draggedPort != null; } }
 
-    private Node hoveredNode = null;
-    private Node selectedNode = null;
     private Node draggedNode = null;
-    private Port hoveredPort = null;
-    private Port draggedOutput = null;
-    private Port draggedOutputTarget = null;
+    private Port draggedPort = null;
 
     public void Controls()
     {
@@ -314,15 +341,70 @@ public class GraphEditor : EditorWindow
             case EventType.MouseDrag:
                 if (e.button == 0)
                 {
-
+                    if (IsDraggingNode)
+                    {
+                        draggedNode.X += (int)e.delta.x;
+                        draggedNode.Y += (int)e.delta.y;
+                    }
                 }
-                else
+                break;
+            case EventType.MouseDown:
+                if (e.button == 0)
                 {
+                    foreach (var node in graph.Nodes.Values)
+                    {
+                        if (node.Rect.Contains(e.mousePosition))
+                        {
+                            draggedNode = node;
+                            return;
+                        }
+                    }
 
+                    foreach (var itr in PortPos)
+                    {
+                        if (itr.Value.Contains(e.mousePosition))
+                        {
+                            draggedPort = itr.Key;
+                            Debug.Log("draggedPort");
+                            return;
+                        }
+                    }
                 }
+                else if (e.button == 1)
+                {
+                    foreach (var itr in PortPos)
+                    {
+                        if (itr.Value.Contains(e.mousePosition))
+                        {
+                            foreach (var connect in itr.Key.Connections.ToArray())
+                            {
+                                connect.sourcePort.Connections.Remove(connect);
+                                connect.targetPort.Connections.Remove(connect);
+
+                                graph.Connections.Remove(connect);
+                            }
+                            Repaint();
+                            break;
+                        }
+                    }
+                }
+                break;
+            case EventType.MouseUp:
+                if (IsDraggingPort)
+                {
+                    foreach (var itr in PortPos)
+                    {
+                        if (itr.Value.Contains(e.mousePosition))
+                        {
+                            //if (draggedPort)
+                            break;
+                        }
+                    }
+                }
+                draggedNode = null;
+                draggedPort = null;
                 break;
         }
     }
     #endregion
-
 }

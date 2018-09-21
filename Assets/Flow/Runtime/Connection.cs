@@ -35,8 +35,8 @@ public class Connection
             targetPort = targetNode.GetValueInPort(targetPortName);
         }
 
-        sourcePort.Connection = this;
-        targetPort.Connection = this;
+        sourcePort.Connections.Add(this);
+        targetPort.Connections.Add(this);
     }
 
     public object Value

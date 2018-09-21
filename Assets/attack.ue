@@ -1,36 +1,24 @@
 ﻿{
   "Nodes": [
     {
-      "X": 100,
-      "Y": 100,
+      "X": 459,
+      "Y": 79,
       "Type": "SpellStart",
       "ID": 1,
-      "ValueOut": [
-        "SpellAgent",
-        "SpellTarget"
-      ],
-      "ValueIn": [
-        "SpellAgent",
-        "SpellTarget"
-      ],
+      "ValueOut": null,
+      "ValueIn": [],
       "FlowOut": [
         "Out"
       ],
       "FlowIn": null
     },
     {
-      "X": 600,
-      "Y": 300,
+      "X": 819,
+      "Y": 29,
       "Type": "TakeDamage",
       "ID": 2,
-      "ValueOut": [
-        "Target",
-        "Damage"
-      ],
-      "ValueIn": [
-        "Damage",
-        "Target"
-      ],
+      "ValueOut": [],
+      "ValueIn": null,
       "FlowOut": [
         "out"
       ],
@@ -51,27 +39,5 @@
       }
     ]
   },
-  "Connections": [
-    {
-      "Type": 0,
-      "Source": 1,
-      "SourcePort": "Out",
-      "Target": 2,
-      "TargetPort": "In"
-    },
-    {
-      "Type": 1,
-      "Source": 1,
-      "SourcePort": "SpellAgent",
-      "Target": 2,
-      "TargetPort": "Damage"
-    },
-    {
-      "Type": 1,
-      "Source": 1,
-      "SourcePort": "SpellTarget",
-      "Target": 2,
-      "TargetPort": "Target"
-    }
-  ]
+  "Connections": []
 }

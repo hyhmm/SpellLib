@@ -29,13 +29,13 @@ public class SerNode
         if (node.PortValueInDict.Count > 0)
         {
             ValueOut = new List<string>();
-            ValueOut.AddRange(node.PortValueInDict.Keys);
+            ValueOut.AddRange(node.PortValueOutDict.Keys);
         }
 
         if (node.PortValueOutDict.Count > 0)
         {
             ValueIn = new List<string>();
-            ValueIn.AddRange(node.PortValueOutDict.Keys);
+            ValueIn.AddRange(node.PortValueInDict.Keys);
         }
 
         if (node.FlowInDict.Count > 0)
