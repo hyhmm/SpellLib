@@ -1,17 +1,17 @@
 
 public class Connection
 {
-    public ConnectType connectType { get; private set; }
+    public ConnectType connectType { get; set; }
 
     private Graph graph;
 
-    public Node sourceNode { get; private set; }
+    public Node sourceNode { get; set; }
 
-    public Port sourcePort { get; private set; }
+    public Port sourcePort { get; set; }
 
-    public Node targetNode { get; private set; }
+    public Node targetNode { get; set; }
 
-    public Port targetPort { get; private set; }
+    public Port targetPort { get; set; }
 
     public Connection(Graph graph)
     {

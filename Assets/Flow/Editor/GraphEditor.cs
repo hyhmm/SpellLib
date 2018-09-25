@@ -50,6 +50,7 @@ public class GraphEditor : EditorWindow
         if (graph == null)
             return;
 
+       
         Controls();
 
         DrawGrid();
@@ -390,13 +391,26 @@ public class GraphEditor : EditorWindow
                 }
                 break;
             case EventType.MouseUp:
+                var labelString = "Can't Connect Here";
+                var size = CanvasStyles.box.CalcSize(new GUIContent(labelString));
+                var rect = new Rect(0, 0, size.x + 10, size.y + 5);
+                GUI.Box(rect, labelString, CanvasStyles.box);
                 if (IsDraggingPort)
                 {
                     foreach (var itr in PortPos)
                     {
                         if (itr.Value.Contains(e.mousePosition))
                         {
-                            //if (draggedPort)
+                            var port = itr.Key;
+                            if (CheckConnectValid(draggedPort, itr.Key))
+                            {
+                                graph.CreateConnection(draggedPort, itr.Key);
+                                Debug.Log("valid");
+                            }
+                            else
+                            {
+                                Debug.Log("Invalid");
+                            }
                             break;
                         }
                     }
@@ -407,4 +421,35 @@ public class GraphEditor : EditorWindow
         }
     }
     #endregion
+
+    int GetPortValue(Port port)
+    {
+        if (port is FlowIn)
+            return 1;
+        else if (port is FlowOut)
+            return 2;
+        else if (port is ValueIn)
+            return 3;
+        else if (port is ValueOut)
+            return 4;
+
+        return 0;
+    }
+
+    bool CheckConnectValid(Port port1, Port port2)
+    {
+      
+        if (port1.node == port2.node)
+        {
+    
+            return false;
+        }
+
+
+        int result = GetPortValue(port1) + GetPortValue(port2);
+        Debug.Log(result);
+        if (result != 3 && result != 7)
+            return false;
+        return true;
+    }
 }

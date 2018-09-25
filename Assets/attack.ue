@@ -1,8 +1,8 @@
 ﻿{
   "Nodes": [
     {
-      "X": 459,
-      "Y": 79,
+      "X": 180,
+      "Y": 148,
       "Type": "SpellStart",
       "ID": 1,
       "ValueOut": null,
@@ -13,8 +13,8 @@
       "FlowIn": null
     },
     {
-      "X": 819,
-      "Y": 29,
+      "X": 527,
+      "Y": 197,
       "Type": "TakeDamage",
       "ID": 2,
       "ValueOut": [],
@@ -39,5 +39,20 @@
       }
     ]
   },
-  "Connections": []
+  "Connections": [
+    {
+      "Type": 1,
+      "Source": 1,
+      "SourcePort": "SpellAgent",
+      "Target": 2,
+      "TargetPort": "Damage"
+    },
+    {
+      "Type": 0,
+      "Source": 1,
+      "SourcePort": "Out",
+      "Target": 2,
+      "TargetPort": "In"
+    }
+  ]
 }

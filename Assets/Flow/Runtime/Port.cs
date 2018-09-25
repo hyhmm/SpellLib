@@ -10,12 +10,15 @@ public class Port
     public List<Connection> Connections = new List<Connection>();
 
     public bool IsConnected { get { return Connections.Count > 0; } }
+
+    public Node node;
 }
 
 public class ValueIn : Port
 {
-    public ValueIn(string name)
+    public ValueIn(Node node, string name)
     {
+        this.node = node;
         this.name = name;
     }
 
@@ -28,8 +31,9 @@ public class ValueIn : Port
 public class ValueOut : Port
 {
     ValueHandler valueHandler;
-    public ValueOut(string name)
+    public ValueOut(Node node, string name)
     {
+        this.node = node;
         this.name = name;
     }
 
@@ -47,8 +51,9 @@ public class ValueOut : Port
 public class FlowIn : Port
 {
     FlowHandler flowHandler;
-    public FlowIn(string name)
+    public FlowIn(Node node, string name)
     {
+        this.node = node;
         this.name = name;
     }
 
@@ -66,8 +71,9 @@ public class FlowIn : Port
 
 public class FlowOut : Port
 {
-    public FlowOut(string name)
+    public FlowOut(Node node, string name)
     {
+        this.node = node;
         this.name = name;
     }
 

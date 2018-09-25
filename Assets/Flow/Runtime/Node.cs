@@ -74,7 +74,7 @@ public partial class Node {
         if (portValueOutDict.TryGetValue(name, out pv))
             return pv;
 
-        pv = new ValueOut(name);
+        pv = new ValueOut(this, name);
         portValueOutDict.Add(name, pv);
         return pv;
     }
@@ -85,7 +85,7 @@ public partial class Node {
 
         if (!portValueOutDict.TryGetValue(name, out pv))
         {
-            pv = new ValueOut(name);
+            pv = new ValueOut(this, name);
             portValueOutDict.Add(name, pv);
         }
 
@@ -99,7 +99,7 @@ public partial class Node {
         if (portValueInDict.TryGetValue(name, out pv)){
             return pv;
         }
-        pv = new ValueIn(name);
+        pv = new ValueIn(this, name);
         portValueInDict.Add(name, pv);
         return pv;
     }
@@ -122,7 +122,7 @@ public partial class Node {
     {
         FlowIn fi;
         if (!flowInDict.TryGetValue(name, out fi)) {
-            fi = new FlowIn(name);
+            fi = new FlowIn(this, name);
             flowInDict.Add(name, fi);
         }
 
@@ -137,7 +137,7 @@ public partial class Node {
         {
             return fi;
         }
-        fi = new FlowIn(name);
+        fi = new FlowIn(this, name);
         flowInDict.Add(name, fi);
         return fi;
     }
@@ -148,7 +148,7 @@ public partial class Node {
         if (flowOutDict.TryGetValue(name, out fo))
             return fo;
 
-        fo = new FlowOut(name);
+        fo = new FlowOut(this, name);
         flowOutDict.Add(name, fo);
         return fo;
     }

@@ -59,4 +59,10 @@ public static class CanvasStyles
         get { return _editorPanel ?? (_editorPanel = styleSheet.GetStyle("editorPanel")); }
     }
 
+    public static GUIStyle box
+    {
+        get { return styleSheet.box; }
+    }
+
+
 }

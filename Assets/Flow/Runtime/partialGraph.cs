@@ -157,3 +157,51 @@ partial class Blackboard
         return name;
     }
 }
+
+partial class Graph
+{
+    public void CreateConnection(Port port1, Port port2)
+    {
+        Connection connection = new Connection(this);
+
+        Port source, target;
+        if (port1 is FlowIn || port1 is FlowOut)
+        {
+            connection.connectType = ConnectType.Flow;
+
+            if (port1 is FlowOut)
+            {
+                source = port1;
+                target = port2;
+            }
+            else
+            {
+                source = port2;
+                target = port1;
+            }
+        }
+        else
+        {
+            connection.connectType = ConnectType.Value;
+
+            if (port1 is ValueOut)
+            {
+                source = port1;
+                target = port2;
+            }
+            else
+            {
+                source = port2;
+                target = port1;
+            }
+        }
+
+        connection.sourcePort = source;
+        connection.sourceNode = source.node;
+        connection.targetPort = target;
+        connection.targetNode = target.node;
+        Connections.Add(connection);
+        source.Connections.Add(connection);
+        target.Connections.Add(connection);
+    }
+}
