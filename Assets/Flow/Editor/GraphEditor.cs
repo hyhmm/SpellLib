@@ -7,6 +7,49 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Linq;
 
+public class Tips
+{
+    EditorWindow ew;
+    float lastCheckTime;
+    public Tips(EditorWindow ew)
+    {
+        this.ew = ew;
+    }
+    List<string> tipList = new List<string>();
+
+    public void AddTips(string tips)
+    {
+        tips = string.Format("<b><size=12><color=#{0}>{1}</color></size></b>", "eed9a7", tips);
+        tipList.Add(tips);
+    }
+
+    public void AddError(string tips)
+    {
+        tips = string.Format("<b><size=12><color=#{0}>{1}</color></size></b>", "ff0000", tips);
+        tipList.Add(tips);
+    }
+
+    public void OnGui()
+    {
+        if (tipList.Count == 0)
+        {
+            lastCheckTime = Time.realtimeSinceStartup;
+            return;
+        }
+
+        if (Time.realtimeSinceStartup - lastCheckTime > 10)
+        {
+            lastCheckTime = Time.realtimeSinceStartup;
+            tipList.RemoveAt(0);
+        }
+
+        for (int i = 0; i < tipList.Count; i++)
+        {
+            GUI.Label(new Rect(0, ew.position.height - (tipList.Count - i) * 12, 200, 12), tipList[i], Styles.leftLabel);
+        }
+    }
+}
+
 public class GraphEditor : EditorWindow
 {
     private static GUILayoutOption[] layoutOptions = new GUILayoutOption[] { GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true), GUILayout.Height(16) };
@@ -16,6 +59,8 @@ public class GraphEditor : EditorWindow
     static Graph graph;
 
     static string filePath;
+
+    Tips tips;
 
     [MenuItem("Tools/SaveEditor %w")] // ctrl + w
     public static void Save()
@@ -39,7 +84,8 @@ public class GraphEditor : EditorWindow
             SerGraph sg = JsonConvert.DeserializeObject<SerGraph>(data);
             graph = new Graph();
             graph.Load(sg);
-            GetWindow<GraphEditor>();
+            var ge = GetWindow<GraphEditor>();
+            ge.tips = new Tips(ge);
             return true;
         }
         return false;
@@ -59,6 +105,7 @@ public class GraphEditor : EditorWindow
         DrawDraggedConnection();
         DrawBlackboard();
         DrawToolbar();
+        tips.OnGui();
     }
 
 #region Node
@@ -158,7 +205,6 @@ public class GraphEditor : EditorWindow
                 var port = flowIns[i]; 
                 Rect rect = new Rect(0, 0, 10, 10);
                 rect.position = new Vector2(node.X - 15, node.Y + i * portHeight + startOffset);
-                GUI.Box(rect, string.Empty, port.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
                 PortPos.Add(flowIns[i], rect);
             }
 
@@ -168,7 +214,6 @@ public class GraphEditor : EditorWindow
                 var port = flowOuts[i];
                 Rect rect = new Rect(0, 0, 10, 10);
                 rect.position = new Vector2(node.X + node.Width + 5, node.Y + i * portHeight + startOffset);
-                GUI.Box(rect, string.Empty, port.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
                 PortPos.Add(flowOuts[i], rect);
             }
 
@@ -178,7 +223,6 @@ public class GraphEditor : EditorWindow
                 var port = valueIns[i];
                 Rect rect = new Rect(0, 0, 10, 10);
                 rect.position = new Vector2(node.X - 15, node.Y + (i + flowCount) * portHeight + startOffset);
-                GUI.Box(rect, string.Empty, port.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
                 PortPos.Add(valueIns[i], rect);
             }
 
@@ -188,7 +232,6 @@ public class GraphEditor : EditorWindow
                 var port = valueOuts[i];
                 Rect rect = new Rect(0, 0, 10, 10);
                 rect.position = new Vector2(node.X + node.Width + 5, node.Y + (i + flowCount) * portHeight + startOffset);
-                GUI.Box(rect, string.Empty, port.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
                 PortPos.Add(valueOuts[i], rect);
             }
         }
@@ -199,6 +242,11 @@ public class GraphEditor : EditorWindow
             var endPos = PortPos[connect.targetPort].center;
             Color color = connect.connectType == ConnectType.Flow ? new Color(0.5f, 0.5f, 0.8f, 0.8f) : new Color(0.3f, 0.3f, 0.3f, 1f);
             DrawConnection(startPos, endPos, color);
+        }
+
+        foreach (var itr in PortPos)
+        {
+            GUI.Box(itr.Value, string.Empty, itr.Key.IsConnected ? CanvasStyles.nodePortConnected : CanvasStyles.nodePortEmpty);
         }
     }
 
@@ -366,7 +414,6 @@ public class GraphEditor : EditorWindow
                         if (itr.Value.Contains(e.mousePosition))
                         {
                             draggedPort = itr.Key;
-                            Debug.Log("draggedPort");
                             return;
                         }
                     }
@@ -405,11 +452,7 @@ public class GraphEditor : EditorWindow
                             if (CheckConnectValid(draggedPort, itr.Key))
                             {
                                 graph.CreateConnection(draggedPort, itr.Key);
-                                Debug.Log("valid");
-                            }
-                            else
-                            {
-                                Debug.Log("Invalid");
+                                Repaint();
                             }
                             break;
                         }
@@ -438,10 +481,21 @@ public class GraphEditor : EditorWindow
 
     bool CheckConnectValid(Port port1, Port port2)
     {
-      
+        if (((port1 is ValueIn) && port1.Connections.Count > 0) || ((port2 is ValueIn) && port2.Connections.Count > 0))
+        {
+            tips.AddError("输入口不能有多个连接");
+            return false;
+        }
+
+        if (port1.Connections.Intersect(port2.Connections).Count() > 0)
+        {
+            tips.AddError("已连接");
+            return false;
+        }
+
         if (port1.node == port2.node)
         {
-    
+            tips.AddError("同一个节点不能相接");
             return false;
         }
 
@@ -449,7 +503,10 @@ public class GraphEditor : EditorWindow
         int result = GetPortValue(port1) + GetPortValue(port2);
         Debug.Log(result);
         if (result != 3 && result != 7)
+        {
+            tips.AddError("端口类型不一致");
             return false;
+        }
         return true;
     }
 }
