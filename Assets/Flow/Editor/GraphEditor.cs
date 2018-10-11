@@ -62,6 +62,8 @@ public class GraphEditor : EditorWindow
 
     Tips tips;
 
+    Vector2 pan = Vector2.zero;
+
     [MenuItem("Tools/SaveEditor %w")] // ctrl + w
     public static void Save()
     {
@@ -71,6 +73,12 @@ public class GraphEditor : EditorWindow
 
         string data = graph.Serialize();
         Util.WriteTextFile(filePath, data);
+    }
+
+    void Init()
+    {
+        this.tips = new Tips(this);
+        pan = Vector2.zero;
     }
 
     [OnOpenAssetAttribute(0)]
@@ -85,7 +93,7 @@ public class GraphEditor : EditorWindow
             graph = new Graph();
             graph.Load(sg);
             var ge = GetWindow<GraphEditor>();
-            ge.tips = new Tips(ge);
+            ge.Init();
             return true;
         }
         return false;
@@ -95,14 +103,14 @@ public class GraphEditor : EditorWindow
     {
         if (graph == null)
             return;
-
-       
-        Controls();
-
         DrawGrid();
+        Rect totalCanvas = new Rect(pan.x, pan.y, position.width, position.height);
+        GUI.BeginGroup(totalCanvas);
+        Controls();
         DrawNodes();
         DrawConnections();
         DrawDraggedConnection();
+        GUI.EndGroup();
         DrawBlackboard();
         DrawToolbar();
         tips.OnGui();
@@ -395,6 +403,11 @@ public class GraphEditor : EditorWindow
                         draggedNode.X += (int)e.delta.x;
                         draggedNode.Y += (int)e.delta.y;
                     }
+                }
+                else if (e.button == 1 || e.button == 2)
+                {  
+                    pan += e.delta;
+                    Repaint();
                 }
                 break;
             case EventType.MouseDown:
