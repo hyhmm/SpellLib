@@ -64,6 +64,8 @@ public class GraphEditor : EditorWindow
 
     Vector2 pan = Vector2.zero;
 
+    float zoom = 1f;
+
     [MenuItem("Tools/SaveEditor %w")] // ctrl + w
     public static void Save()
     {
@@ -79,6 +81,7 @@ public class GraphEditor : EditorWindow
     {
         this.tips = new Tips(this);
         pan = Vector2.zero;
+        zoom = 1f;
     }
 
     [OnOpenAssetAttribute(0)]
@@ -104,6 +107,7 @@ public class GraphEditor : EditorWindow
         if (graph == null)
             return;
         DrawGrid();
+        StartZoom();
         Rect totalCanvas = new Rect(pan.x, pan.y, position.width, position.height);
         GUI.BeginGroup(totalCanvas);
         Controls();
@@ -111,9 +115,23 @@ public class GraphEditor : EditorWindow
         DrawConnections();
         DrawDraggedConnection();
         GUI.EndGroup();
+        EndZoom();
         DrawBlackboard();
         DrawToolbar();
         tips.OnGui();
+    }
+    
+    void StartZoom()
+    {
+        Matrix4x4 guiMatrix = Matrix4x4.identity;
+        guiMatrix.SetTRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(zoom, zoom, 1));
+        GUI.matrix = guiMatrix;
+       
+    }
+
+    void EndZoom()
+    {
+        GUI.matrix = Matrix4x4.identity;
     }
 
 #region Node
@@ -394,6 +412,8 @@ public class GraphEditor : EditorWindow
             case EventType.MouseMove:
                 break;
             case EventType.ScrollWheel:
+                zoom += 0.1f * (e.delta.y > 0 ? -1 : 1) * zoom;
+                Repaint();
                 break;
             case EventType.MouseDrag:
                 if (e.button == 0)
