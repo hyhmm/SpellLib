@@ -65,6 +65,7 @@ public class GraphEditor : EditorWindow
     Vector2 pan = Vector2.zero;
 
     float zoom = 1f;
+    Vector2 zoomPosition;
 
     [MenuItem("Tools/SaveEditor %w")] // ctrl + w
     public static void Save()
@@ -82,6 +83,7 @@ public class GraphEditor : EditorWindow
         this.tips = new Tips(this);
         pan = Vector2.zero;
         zoom = 1f;
+        zoomPosition = Vector2.zero;
     }
 
     [OnOpenAssetAttribute(0)]
@@ -124,9 +126,8 @@ public class GraphEditor : EditorWindow
     void StartZoom()
     {
         Matrix4x4 guiMatrix = Matrix4x4.identity;
-        guiMatrix.SetTRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(zoom, zoom, 1));
+        guiMatrix.SetTRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(0.5f, 0.5f, 1));
         GUI.matrix = guiMatrix;
-       
     }
 
     void EndZoom()
@@ -413,6 +414,9 @@ public class GraphEditor : EditorWindow
                 break;
             case EventType.ScrollWheel:
                 zoom += 0.1f * (e.delta.y > 0 ? -1 : 1) * zoom;
+                
+                //zoomPosition = (e.mousePosition - e.mousePosition * zoom) - zoomPosition;
+                //zoomPosition = new Vector2((position.width /2f - position.width / 2f * zoom), position.height / 2f - position.height / 2f * zoom);
                 Repaint();
                 break;
             case EventType.MouseDrag:
