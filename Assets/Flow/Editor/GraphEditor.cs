@@ -62,10 +62,10 @@ public class GraphEditor : EditorWindow
 
     Tips tips;
 
-    Vector2 pan = Vector2.zero;
-
+    Vector2 pan = new Vector2(-2500, -2500);
     float zoom = 1f;
-    Vector2 zoomPosition;
+    private const float kZoomMin = 0.1f;
+    private const float kZoomMax = 10.0f;
 
     [MenuItem("Tools/SaveEditor %w")] // ctrl + w
     public static void Save()
@@ -81,9 +81,8 @@ public class GraphEditor : EditorWindow
     void Init()
     {
         this.tips = new Tips(this);
-        pan = Vector2.zero;
-        zoom = 1f;
-        zoomPosition = Vector2.zero;
+        pan = new Vector2(0, 0);
+        zoom = 0.8f;
     }
 
     [OnOpenAssetAttribute(0)]
@@ -108,31 +107,23 @@ public class GraphEditor : EditorWindow
     {
         if (graph == null)
             return;
+
         DrawGrid();
-        StartZoom();
-        Rect totalCanvas = new Rect(pan.x, pan.y, position.width, position.height);
-        GUI.BeginGroup(totalCanvas);
+        HandleZoomAndPan();
+        Rect zoomArea = new Rect(0, 0, position.width, position.height);
+        EditorZoomArea.Begin(zoom, zoomArea);
+        GUI.BeginGroup(new Rect(-pan.x, -pan.y, 5000,  5000));
+    
         Controls();
         DrawNodes();
         DrawConnections();
         DrawDraggedConnection();
         GUI.EndGroup();
-        EndZoom();
-        DrawBlackboard();
+        EditorZoomArea.End();
+
+        //DrawBlackboard();
         DrawToolbar();
         tips.OnGui();
-    }
-    
-    void StartZoom()
-    {
-        Matrix4x4 guiMatrix = Matrix4x4.identity;
-        guiMatrix.SetTRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(0.5f, 0.5f, 1));
-        GUI.matrix = guiMatrix;
-    }
-
-    void EndZoom()
-    {
-        GUI.matrix = Matrix4x4.identity;
     }
 
 #region Node
@@ -405,20 +396,46 @@ public class GraphEditor : EditorWindow
     private Node draggedNode = null;
     private Port draggedPort = null;
 
+    /*
+    x = zoom坐标
+    z = 缩放前
+    z1 = 缩放后
+    p = 平移前
+    p1 = 平移后
+    s = 屏幕坐标
+    (x - p) * z = s
+    (x - p1) * z1 = s
+    x = s / z + p
+    p1 = s / z - s / z1 + p
+     * */
+    public void HandleZoomAndPan()
+    {
+        Event e = Event.current;
+        switch (e.type)
+        {
+            case EventType.ScrollWheel:
+                float oldZoom = zoom;
+                zoom += 0.1f * (e.delta.y > 0 ? -1 : 1) * zoom;
+                zoom = Mathf.Clamp(zoom, kZoomMin, kZoomMax);
+
+                pan = (e.mousePosition / oldZoom) - e.mousePosition / zoom + pan;
+                Event.current.Use();
+                break;
+            case EventType.MouseDrag:
+                if (e.button == 1 || e.button == 2)
+                {
+                    pan -= e.delta;
+                    Repaint();
+                }
+                break;
+        }
+    }
+
     public void Controls()
     {
         Event e = Event.current;
         switch (e.type)
         {
-            case EventType.MouseMove:
-                break;
-            case EventType.ScrollWheel:
-                zoom += 0.1f * (e.delta.y > 0 ? -1 : 1) * zoom;
-                
-                //zoomPosition = (e.mousePosition - e.mousePosition * zoom) - zoomPosition;
-                //zoomPosition = new Vector2((position.width /2f - position.width / 2f * zoom), position.height / 2f - position.height / 2f * zoom);
-                Repaint();
-                break;
             case EventType.MouseDrag:
                 if (e.button == 0)
                 {
@@ -427,11 +444,6 @@ public class GraphEditor : EditorWindow
                         draggedNode.X += (int)e.delta.x;
                         draggedNode.Y += (int)e.delta.y;
                     }
-                }
-                else if (e.button == 1 || e.button == 2)
-                {  
-                    pan += e.delta;
-                    Repaint();
                 }
                 break;
             case EventType.MouseDown:
