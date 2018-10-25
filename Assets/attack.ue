@@ -1,8 +1,8 @@
 ﻿{
   "Nodes": [
     {
-      "X": 4900,
-      "Y": 4910,
+      "X": 2287,
+      "Y": 2558,
       "Type": "SpellStart",
       "ID": 1,
       "ValueOut": null,
@@ -13,10 +13,36 @@
       "FlowIn": null
     },
     {
-      "X": 0,
-      "Y": 100,
+      "X": 2631,
+      "Y": 2439,
       "Type": "TakeDamage",
       "ID": 2,
+      "ValueOut": [],
+      "ValueIn": null,
+      "FlowOut": [
+        "out"
+      ],
+      "FlowIn": [
+        "In"
+      ]
+    },
+    {
+      "X": 2732,
+      "Y": 2193,
+      "Type": "SpellStart",
+      "ID": 3,
+      "ValueOut": null,
+      "ValueIn": [],
+      "FlowOut": [
+        "Out"
+      ],
+      "FlowIn": null
+    },
+    {
+      "X": 2832,
+      "Y": 2445,
+      "Type": "TakeDamage",
+      "ID": 4,
       "ValueOut": [],
       "ValueIn": null,
       "FlowOut": [
@@ -52,6 +78,13 @@
       "Source": 1,
       "SourcePort": "Out",
       "Target": 2,
+      "TargetPort": "In"
+    },
+    {
+      "Type": 0,
+      "Source": 2,
+      "SourcePort": "out",
+      "Target": 4,
       "TargetPort": "In"
     }
   ]

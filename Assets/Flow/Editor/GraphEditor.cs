@@ -62,12 +62,21 @@ public class GraphEditor : EditorWindow
 
     Tips tips;
 
-    Vector2 pan = new Vector2(-2500, -2500);
+    Vector2 pan = Vector2.zero;
     float zoom = 1f;
     private const float kZoomMin = 0.4f;
     private const float kZoomMax = 1.5f;
     private const float kSize = 5000f;
 
+    Vector2 Screen2Zoom(Vector2 position)
+    {
+        return position / zoom + pan;
+    }
+
+    Vector2 Zoom2Screen(Vector2 position)
+    {
+        return (position - pan) * zoom;
+    }
 
     [MenuItem("Tools/SaveEditor %w")] // ctrl + w
     public static void Save()
@@ -83,8 +92,8 @@ public class GraphEditor : EditorWindow
     void Init()
     {
         this.tips = new Tips(this);
-        pan = Vector2.zero;
-        zoom = 1f;
+        zoom = 0.4f;
+        pan = new Vector2(kSize / 2 - position.width / 2 / zoom, kSize / 2 - position.height / 2 / zoom);
     }
 
     [OnOpenAssetAttribute(0)]
@@ -123,13 +132,31 @@ public class GraphEditor : EditorWindow
         DrawDraggedConnection();
         GUILayout.EndArea();
         EditorZoomArea.End();
-
+        if (PostGUI != null)
+        {
+            PostGUI();
+            PostGUI = null;
+        }
         //DrawBlackboard();
         DrawToolbar();
         tips.OnGui();
     }
 
-#region Node
+    #region  postGui
+    public static event System.Action PostGUI;
+    public static void InvokePostGUI()
+    {
+        if (PostGUI != null)
+        {
+            PostGUI();
+            PostGUI = null;
+        }
+    }
+
+
+
+    #endregion
+    #region Node
     void DrawNodes()
     {
         BeginWindows();
@@ -363,18 +390,18 @@ public class GraphEditor : EditorWindow
 
         Handles.color = new Color(0, 0, 0, 0.15f);
 
-        var drawGridSize = 15;
-        var step = drawGridSize;
+        var drawGridSize = 35;
+        var step = drawGridSize * zoom;
 
-        var xStart = 0;
-        var xEnd = position.width-0;
+        float xStart = 0;
+        float xEnd = position.width-0;
         for (var i = xStart; i < xEnd; i += step)
         {
             Handles.DrawLine(new Vector3(i, 0, 0), new Vector3(i, position.height, 0));
         }
 
-        var yStart = 0;
-        var yEnd = position.height;
+        float yStart = 0f;
+        float yEnd = position.height;
         for (var i = yStart; i < yEnd; i += step)
         {
             Handles.DrawLine(new Vector3(0, i, 0), new Vector3(position.width, i, 0));
@@ -504,30 +531,51 @@ public class GraphEditor : EditorWindow
                 }
                 break;
             case EventType.MouseUp:
-                var labelString = "Can't Connect Here";
-                var size = CanvasStyles.box.CalcSize(new GUIContent(labelString));
-                var rect = new Rect(0, 0, size.x + 10, size.y + 5);
-                GUI.Box(rect, labelString, CanvasStyles.box);
-                if (IsDraggingPort)
+                if (e.button == 0)
                 {
-                    foreach (var itr in PortPos)
+                    if (IsDraggingPort)
                     {
-                        if (itr.Value.Contains(e.mousePosition))
+                        foreach (var itr in PortPos)
                         {
-                            var port = itr.Key;
-                            if (CheckConnectValid(draggedPort, itr.Key))
+                            if (itr.Value.Contains(e.mousePosition))
                             {
-                                graph.CreateConnection(draggedPort, itr.Key);
-                                Repaint();
+                                var port = itr.Key;
+                                if (CheckConnectValid(draggedPort, itr.Key))
+                                {
+                                    graph.CreateConnection(draggedPort, itr.Key);
+                                    Repaint();
+                                }
+                                break;
                             }
+                        }
+                    }
+                    draggedNode = null;
+                    draggedPort = null;
+                }
+                else if (e.button == 1)
+                {
+                    foreach (var node in graph.Nodes.Values)
+                    {
+                        if (node.Rect.Contains(e.mousePosition))
+                        {
+                            ShowNodeContextMenu(node);
                             break;
                         }
                     }
                 }
-                draggedNode = null;
-                draggedPort = null;
                 break;
         }
+    }
+
+    void ShowNodeContextMenu(Node node)
+    {
+        GenericMenu contextMenu = new GenericMenu();
+        contextMenu.AddItem(new GUIContent("Duplicate"), false, () =>
+        {
+            var clone = graph.CopyNode(node);
+            clone.X = node.X + 30; clone.Y = node.Y + 30;
+        });
+        PostGUI += () => { contextMenu.ShowAsContext(); };
     }
     #endregion
 

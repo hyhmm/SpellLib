@@ -43,6 +43,15 @@ partial class Node
     {
         get { return System.Math.Max(PortValueInDict.Count, PortValueOutDict.Count); }
     }
+
+    public void Load(Graph graph)
+    {
+        this.graph = graph;
+        this.blackboard = graph.Blackboard;
+        this.ID = graph.GenNewId();
+
+        this.RegisterPort();
+    }
 }
 
 partial class Blackboard
@@ -203,5 +212,21 @@ partial class Graph
         Connections.Add(connection);
         source.Connections.Add(connection);
         target.Connections.Add(connection);
+    }
+
+    public Node CopyNode(Node node)
+    {
+        var clone = (Node)Activator.CreateInstance(node.GetType());
+        clone.Load(this);
+        nodes.Add(clone.ID, clone);
+        return clone;
+    }
+
+    public int GenNewId()
+    {
+        int id = 1;
+        while (nodes.Keys.Contains(id))
+            id++;
+        return id;
     }
 }
