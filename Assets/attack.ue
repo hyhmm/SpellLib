@@ -1,8 +1,8 @@
 ﻿{
   "Nodes": [
     {
-      "X": 180,
-      "Y": 148,
+      "X": 4900,
+      "Y": 4910,
       "Type": "SpellStart",
       "ID": 1,
       "ValueOut": null,
@@ -13,8 +13,8 @@
       "FlowIn": null
     },
     {
-      "X": 527,
-      "Y": 197,
+      "X": 0,
+      "Y": 100,
       "Type": "TakeDamage",
       "ID": 2,
       "ValueOut": [],

@@ -64,8 +64,10 @@ public class GraphEditor : EditorWindow
 
     Vector2 pan = new Vector2(-2500, -2500);
     float zoom = 1f;
-    private const float kZoomMin = 0.1f;
-    private const float kZoomMax = 10.0f;
+    private const float kZoomMin = 0.4f;
+    private const float kZoomMax = 1.5f;
+    private const float kSize = 5000f;
+
 
     [MenuItem("Tools/SaveEditor %w")] // ctrl + w
     public static void Save()
@@ -81,8 +83,8 @@ public class GraphEditor : EditorWindow
     void Init()
     {
         this.tips = new Tips(this);
-        pan = new Vector2(0, 0);
-        zoom = 0.8f;
+        pan = Vector2.zero;
+        zoom = 1f;
     }
 
     [OnOpenAssetAttribute(0)]
@@ -102,7 +104,7 @@ public class GraphEditor : EditorWindow
         }
         return false;
     }
-
+    private static Matrix4x4 _prevGuiMatrix;
     private void OnGUI()
     {
         if (graph == null)
@@ -112,13 +114,14 @@ public class GraphEditor : EditorWindow
         HandleZoomAndPan();
         Rect zoomArea = new Rect(0, 0, position.width, position.height);
         EditorZoomArea.Begin(zoom, zoomArea);
-        GUI.BeginGroup(new Rect(-pan.x, -pan.y, 5000,  5000));
-    
+
+        GUILayout.BeginArea(new Rect(-pan.x, -pan.y, kSize, kSize));
+
         Controls();
         DrawNodes();
-        DrawConnections();
+        DrawConnections(); 
         DrawDraggedConnection();
-        GUI.EndGroup();
+        GUILayout.EndArea();
         EditorZoomArea.End();
 
         //DrawBlackboard();
@@ -397,6 +400,19 @@ public class GraphEditor : EditorWindow
     private Port draggedPort = null;
 
     /*
+     s = 屏幕坐标
+     z = 缩放
+     p = 平移
+     x = zoom坐标
+    (x - p) * z = s
+     */
+    public void SetPan(Vector2 newPan)
+    {
+        pan.x = Mathf.Clamp(newPan.x, 0, kSize - position.width / zoom);
+        pan.y = Mathf.Clamp(newPan.y, 0, kSize - position.height / zoom);
+    }
+
+    /*
     x = zoom坐标
     z = 缩放前
     z1 = 缩放后
@@ -417,14 +433,15 @@ public class GraphEditor : EditorWindow
                 float oldZoom = zoom;
                 zoom += 0.1f * (e.delta.y > 0 ? -1 : 1) * zoom;
                 zoom = Mathf.Clamp(zoom, kZoomMin, kZoomMax);
-
                 pan = (e.mousePosition / oldZoom) - e.mousePosition / zoom + pan;
+                SetPan(pan);
                 Event.current.Use();
                 break;
             case EventType.MouseDrag:
                 if (e.button == 1 || e.button == 2)
                 {
                     pan -= e.delta;
+                    SetPan(pan);
                     Repaint();
                 }
                 break;
