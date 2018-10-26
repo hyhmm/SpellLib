@@ -7,7 +7,7 @@ using System.Linq;
 
 public partial class Node {
     public int ID;
-    protected Graph graph;
+    public Graph graph;
     protected Blackboard blackboard;
     protected Dictionary<string, ValueOut> portValueOutDict = new Dictionary<string, ValueOut>();
     protected Dictionary<string, ValueIn> portValueInDict = new Dictionary<string, ValueIn>();

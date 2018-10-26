@@ -1,5 +1,5 @@
 
-public class Connection
+public partial class Connection
 {
     public ConnectType connectType { get; set; }
 

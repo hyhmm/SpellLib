@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public delegate object ValueHandler();
 public delegate void FlowHandler();
-public class Port
+public partial class Port
 {
     public string name;
 

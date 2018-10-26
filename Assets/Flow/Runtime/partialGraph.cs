@@ -4,6 +4,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+partial class Port
+{
+    public void ClearConnections()
+    { 
+        for (int i = Connections.Count-1; i >= 0; i--)
+        {
+            var connection = Connections[i];
+            connection.sourcePort.Connections.Remove(connection);
+            connection.targetPort.Connections.Remove(connection);
+            this.node.graph.Connections.Remove(connection);
+        }
+    }
+}
+
 partial class Node
 {
     public int X;
@@ -51,6 +65,15 @@ partial class Node
         this.ID = graph.GenNewId();
 
         this.RegisterPort();
+    }
+
+    public void RemoveConnection()
+    {
+        FlowInDict.Values.ToList().ForEach((x) => x.ClearConnections());
+        FlowOutDict.Values.ToList().ForEach((x) => x.ClearConnections());
+        PortValueInDict.Values.ToList().ForEach((x) => x.ClearConnections());
+        PortValueOutDict.Values.ToList().ForEach((x) => x.ClearConnections());
+        
     }
 }
 
@@ -228,5 +251,11 @@ partial class Graph
         while (nodes.Keys.Contains(id))
             id++;
         return id;
+    }
+
+    public void RemoveNode(Node node)
+    {
+        this.nodes.Remove(node.ID);
+        node.RemoveConnection();
     }
 }
