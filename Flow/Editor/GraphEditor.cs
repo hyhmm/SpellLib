@@ -131,8 +131,8 @@ namespace XFlow
                 GUILayout.BeginArea(new Rect(-pan.x, -pan.y, kSize, kSize));
 
                 Controls();
-                DrawConnections();
                 DrawNodes();
+                DrawConnections();
                 DrawDraggedConnection();
                 GUILayout.EndArea();
                 EditorZoomArea.End();
@@ -188,7 +188,7 @@ namespace XFlow
             void NodeWindowGUI(int id, Node node)
             {
                 node.DrawOrder = nodeDrawOrder++;
-                var text = string.Format("<b><size=12><color=#{0}>{1}</color></size></b>", "eed9a7", node.GetType().ToString());
+                var text = string.Format("<b><size=12><color=#{0}>{1}</color></size></b>", "eed9a7", node.GetType().ToString().Split('.').Last());
                 var content = new GUIContent(text, "node");
                 GUILayout.Label(content, CanvasStyles.nodeTitle, GUILayout.MaxHeight(23));
 
