@@ -9,7 +9,7 @@ public class UseSpell : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         var bt = this.GetComponent<Button>();
-        bt.onClick.AddListener(() => { this.GetComponent<SpellAgent>().DispatchSpellStart(); });
+        bt.onClick.AddListener(() => { this.GetComponent<XFlow.SpellAgent>().DispatchSpellStart(); });
 	}
 	
 	// Update is called once per frame

@@ -4,258 +4,316 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-partial class Port
+namespace XFlow
 {
-    public void ClearConnections()
-    { 
-        for (int i = Connections.Count-1; i >= 0; i--)
-        {
-            var connection = Connections[i];
-            connection.sourcePort.Connections.Remove(connection);
-            connection.targetPort.Connections.Remove(connection);
-            this.node.graph.Connections.Remove(connection);
-        }
-    }
-}
-
-partial class Node
-{
-    public int X;
-    public int Y;
-
-    public float Width;
-
-    public float Height;
-
-    public Rect Rect
+    partial class Port
     {
-        get { return new Rect(X, Y, Width, Height); }
-        set
+        public void ClearConnections()
         {
-            X = (int)value.x;
-            Y = (int)value.y;
-            Width = value.width;
-            Height = value.height;
+            for (int i = Connections.Count - 1; i >= 0; i--)
+            {
+                var connection = Connections[i];
+                connection.sourcePort.Connections.Remove(connection);
+                connection.targetPort.Connections.Remove(connection);
+                this.node.graph.Connections.Remove(connection);
+            }
         }
     }
 
-    public int DefaultWidth { get { return 100; } }
-    public int DefaultHeight
+    partial class Node
     {
-        get
+        public int X;
+        public int Y;
+
+        public int DrawOrder;
+
+        public float Width;
+
+        public float Height;
+
+        public Rect Rect
         {
-            return (FlowCount + PortCount) * 30;
+            get { return new Rect(X, Y, Width, Height); }
+            set
+            {
+                //X = (int)value.x;
+                //Y = (int)value.y;
+                Width = value.width;
+                Height = value.height;
+            }
         }
-    }
 
-    public int FlowCount
-    {
-        get { return System.Math.Max(FlowInDict.Count, FlowOutDict.Count); }
-    }
-
-    public int PortCount
-    {
-        get { return System.Math.Max(PortValueInDict.Count, PortValueOutDict.Count); }
-    }
-
-    public void Load(Graph graph)
-    {
-        this.graph = graph;
-        this.blackboard = graph.Blackboard;
-        this.ID = graph.GenNewId();
-
-        this.RegisterPort();
-    }
-
-    public void RemoveConnection()
-    {
-        FlowInDict.Values.ToList().ForEach((x) => x.ClearConnections());
-        FlowOutDict.Values.ToList().ForEach((x) => x.ClearConnections());
-        PortValueInDict.Values.ToList().ForEach((x) => x.ClearConnections());
-        PortValueOutDict.Values.ToList().ForEach((x) => x.ClearConnections());
-        
-    }
-}
-
-partial class Blackboard
-{
-    public class Data
-    {
-        public string Name;
-        public object Value;
-
-        private string strValue = null;
-        public string StrValue
+        public int DefaultWidth { get { return 100; } }
+        public int DefaultHeight
         {
             get
             {
-                if (strValue == null)
-                    strValue = ToValueString(Value);
-                return strValue;
-            }
-            set
-            {
-                if (strValue == value)
-                    return;
-
-                strValue = value;
-                Value = ToValue(strValue);
+                return (FlowCount + PortCount) * 30;
             }
         }
 
-        public string ToValueString(object value)
+        public int FlowCount
         {
-            string ret = "";
-            System.Type type = value.GetType();
-            if (type.IsArray || typeof(IEnumerable).IsAssignableFrom(type))
-            {
-                var v = (IEnumerable)value;
-                foreach (var iv in v)
-                {
-                    ret += iv + ",";
-                }
-                return ret.Remove(ret.LastIndexOf(','));
-            }
-            else
-            {
-                return value.ToString();
-            }
+            get { return System.Math.Max(FlowInDict.Count, FlowOutDict.Count); }
         }
 
-        public object ToValue(string strValue)
+        public int PortCount
         {
-            object value;
-            if (strValue.Contains(","))
-            {
-                if (strValue.Contains("."))
-                {
-                    value = Util.ConvertListItemsFromString<float>(strValue);
-                }
-                else
-                {
-                    value = Util.ConvertListItemsFromString<int>(strValue);
-                }
-            }
-            else
-            {
-                if (strValue.Contains("."))
-                    value = float.Parse(strValue);
-                else
-                    value = int.Parse(strValue);
-            }
-            return value;
+            get { return System.Math.Max(PortValueInDict.Count, PortValueOutDict.Count); }
+        }
+
+        public void Load(Graph graph)
+        {
+            this.graph = graph;
+            this.blackboard = graph.Blackboard;
+            this.ID = graph.GenNewId();
+
+            this.RegisterPort();
+        }
+
+        public void RemoveConnection()
+        {
+            FlowInDict.Values.ToList().ForEach((x) => x.ClearConnections());
+            FlowOutDict.Values.ToList().ForEach((x) => x.ClearConnections());
+            PortValueInDict.Values.ToList().ForEach((x) => x.ClearConnections());
+            PortValueOutDict.Values.ToList().ForEach((x) => x.ClearConnections());
+
         }
     }
 
-    List<Data> showDataList;
-    public List<Data> ShowDataList
+    partial class Blackboard
     {
-        get
+        public class Data
         {
-            if (showDataList == null)
+            public string Name;
+            public object Value;
+
+            private string strValue = null;
+            public string StrValue
             {
-                showDataList = new List<Data>();
-                foreach (var itr in DataSource)
+                get
                 {
-                    showDataList.Add(new Data()
+                    if (strValue == null)
+                        strValue = ToValueString(Value);
+                    return strValue;
+                }
+                set
+                {
+                    if (strValue == value)
+                        return;
+
+                    strValue = value;
+                    Value = ToValue(strValue);
+                }
+            }
+
+            public string ToValueString(object value)
+            {
+                string ret = "";
+                System.Type type = value.GetType();
+                if (type.IsArray || typeof(IEnumerable).IsAssignableFrom(type))
+                {
+                    var v = (IEnumerable)value;
+                    foreach (var iv in v)
                     {
-                        Name = itr.Key,
-                        Value = itr.Value
-                    });
+                        ret += iv + ",";
+                    }
+                    return ret.Remove(ret.LastIndexOf(','));
+                }
+                else
+                {
+                    return value.ToString();
                 }
             }
-            return showDataList;
-        }
-    }
 
-    public void AddShowData()
-    {
-        ShowDataList.Add(new Data()
-        {
-            Name = GetNewName("New"),
-            Value = 0
-        });
-    }
-
-    string GetNewName(string name)
-    {
-        foreach (var data in this.ShowDataList)
-        {
-            if (data.Name == name)
+            public object ToValue(string strValue)
             {
-                return GetNewName(name + "1");
+                object value;
+                if (strValue.Contains(","))
+                {
+                    if (strValue.Contains("."))
+                    {
+                        value = Util.ConvertListItemsFromString<float>(strValue);
+                    }
+                    else
+                    {
+                        value = Util.ConvertListItemsFromString<int>(strValue);
+                    }
+                }
+                else
+                {
+                    if (strValue.Contains("."))
+                        value = float.Parse(strValue);
+                    else
+                        value = int.Parse(strValue);
+                }
+                return value;
             }
         }
-        return name;
-    }
-}
 
-partial class Graph
-{
-    public void CreateConnection(Port port1, Port port2)
-    {
-        Connection connection = new Connection(this);
-
-        Port source, target;
-        if (port1 is FlowIn || port1 is FlowOut)
+        List<Data> showDataList;
+        public List<Data> ShowDataList
         {
-            connection.connectType = ConnectType.Flow;
-
-            if (port1 is FlowOut)
+            get
             {
-                source = port1;
-                target = port2;
+                if (showDataList == null)
+                {
+                    showDataList = new List<Data>();
+                    foreach (var itr in DataSource)
+                    {
+                        showDataList.Add(new Data()
+                        {
+                            Name = itr.Key,
+                            Value = itr.Value
+                        });
+                    }
+                }
+                return showDataList;
+            }
+        }
+
+        public void AddShowData()
+        {
+            ShowDataList.Add(new Data()
+            {
+                Name = GetNewName("New"),
+                Value = 0
+            });
+        }
+
+        string GetNewName(string name)
+        {
+            foreach (var data in this.ShowDataList)
+            {
+                if (data.Name == name)
+                {
+                    return GetNewName(name + "1");
+                }
+            }
+            return name;
+        }
+    }
+
+    partial class Graph
+    {
+        public void CreateConnection(Port port1, Port port2)
+        {
+            Connection connection = new Connection(this);
+
+            Port source, target;
+            if (port1 is FlowIn || port1 is FlowOut)
+            {
+                connection.connectType = ConnectType.Flow;
+
+                if (port1 is FlowOut)
+                {
+                    source = port1;
+                    target = port2;
+                }
+                else
+                {
+                    source = port2;
+                    target = port1;
+                }
             }
             else
             {
-                source = port2;
-                target = port1;
+                connection.connectType = ConnectType.Value;
+
+                if (port1 is ValueOut)
+                {
+                    source = port1;
+                    target = port2;
+                }
+                else
+                {
+                    source = port2;
+                    target = port1;
+                }
             }
+
+            connection.sourcePort = source;
+            connection.sourceNode = source.node;
+            connection.targetPort = target;
+            connection.targetNode = target.node;
+            Connections.Add(connection);
+            source.Connections.Add(connection);
+            target.Connections.Add(connection);
         }
-        else
+
+        public Node CopyNode(Node node)
         {
-            connection.connectType = ConnectType.Value;
-
-            if (port1 is ValueOut)
-            {
-                source = port1;
-                target = port2;
-            }
-            else
-            {
-                source = port2;
-                target = port1;
-            }
+            var clone = (Node)Activator.CreateInstance(node.GetType());
+            clone.Load(this);
+            nodes.Add(clone.ID, clone);
+            return clone;
         }
 
-        connection.sourcePort = source;
-        connection.sourceNode = source.node;
-        connection.targetPort = target;
-        connection.targetNode = target.node;
-        Connections.Add(connection);
-        source.Connections.Add(connection);
-        target.Connections.Add(connection);
+        public int GenNewId()
+        {
+            int id = 1;
+            while (nodes.Keys.Contains(id))
+                id++;
+            return id;
+        }
+
+        public void RemoveNode(Node node)
+        {
+            this.nodes.Remove(node.ID);
+            node.RemoveConnection();
+        }
     }
 
-    public Node CopyNode(Node node)
+    #region Attribute
+    [AttributeUsage(AttributeTargets.All)]
+    public class CategoryAttribute : Attribute
     {
-        var clone = (Node)Activator.CreateInstance(node.GetType());
-        clone.Load(this);
-        nodes.Add(clone.ID, clone);
-        return clone;
+        readonly public string category;
+        public CategoryAttribute(string category)
+        {
+            this.category = category;
+        }
     }
+    #endregion
 
-    public int GenNewId()
+    public static class NodeEditorUtilities
     {
-        int id = 1;
-        while (nodes.Keys.Contains(id))
-            id++;
-        return id;
-    }
+        public static bool GetAttrib<T>(Type classType, out T attribOut) where T : Attribute
+        {
+            object[] attribs = classType.GetCustomAttributes(typeof(T), false);
+            return GetAttrib(attribs, out attribOut);
+        }
 
-    public void RemoveNode(Node node)
-    {
-        this.nodes.Remove(node.ID);
-        node.RemoveConnection();
+        public static bool GetAttrib<T>(object[] attribs, out T attribOut) where T : Attribute
+        {
+            for (int i = 0; i < attribs.Length; i++)
+            {
+                if (attribs[i].GetType() == typeof(T))
+                {
+                    attribOut = attribs[i] as T;
+                    return true;
+                }
+            }
+            attribOut = null;
+            return false;
+        }
+
+        public static bool GetAttrib<T>(Type classType, string fieldName, out T attribOut) where T : Attribute
+        {
+            object[] attribs = classType.GetField(fieldName).GetCustomAttributes(typeof(T), false);
+            return GetAttrib(attribs, out attribOut);
+        }
+
+        public static bool HasAttrib<T>(object[] attribs) where T : Attribute
+        {
+            for (int i = 0; i < attribs.Length; i++)
+            {
+                if (attribs[i].GetType() == typeof(T))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

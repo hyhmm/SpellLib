@@ -1,8 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-public enum ConnectType
+namespace XFlow
 {
-    Flow,
-    Value
+    public enum ConnectType
+    {
+        Flow,
+        Value
+    }
 }

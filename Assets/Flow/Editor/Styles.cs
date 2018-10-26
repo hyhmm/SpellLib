@@ -2,35 +2,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Styles {
-
-    private static GUIStyle _leftLabel;
-    public static GUIStyle leftLabel
+namespace XFlow
+{
+    public static class Styles
     {
-        get
+
+        private static GUIStyle _leftLabel;
+        public static GUIStyle leftLabel
         {
-            if (_leftLabel == null)
+            get
             {
-                _leftLabel = new GUIStyle(GUI.skin.GetStyle("label"));
-                _leftLabel.richText = true;
-                _leftLabel.alignment = TextAnchor.MiddleLeft;
+                if (_leftLabel == null)
+                {
+                    _leftLabel = new GUIStyle(GUI.skin.GetStyle("label"));
+                    _leftLabel.richText = true;
+                    _leftLabel.alignment = TextAnchor.MiddleLeft;
+                }
+                return _leftLabel;
             }
-            return _leftLabel;
         }
-    }
 
-    private static GUIStyle _rightLabel;
-    public static GUIStyle rightLabel
-    {
-        get
+        private static GUIStyle _rightLabel;
+        public static GUIStyle rightLabel
         {
-            if (_rightLabel == null)
+            get
             {
-                _rightLabel = new GUIStyle(GUI.skin.GetStyle("label"));
-                _rightLabel.richText = true;
-                _rightLabel.alignment = TextAnchor.MiddleRight;
+                if (_rightLabel == null)
+                {
+                    _rightLabel = new GUIStyle(GUI.skin.GetStyle("label"));
+                    _rightLabel.richText = true;
+                    _rightLabel.alignment = TextAnchor.MiddleRight;
+                }
+                return _rightLabel;
             }
-            return _rightLabel;
         }
     }
 }
