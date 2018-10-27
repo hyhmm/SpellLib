@@ -131,8 +131,8 @@ namespace XFlow
                 GUILayout.BeginArea(new Rect(-pan.x, -pan.y, kSize, kSize));
 
                 Controls();
-                DrawNodes();
                 DrawConnections();
+                DrawNodes();
                 DrawDraggedConnection();
                 GUILayout.EndArea();
                 EditorZoomArea.End();
@@ -175,10 +175,9 @@ namespace XFlow
             void DrawNode(Node node)
             {
                 GUI.color = Color.white;
-                var rect = GUILayout.Window(node.ID, new Rect(node.X, node.Y, node.DefaultWidth, node.DefaultHeight),
+                var rect = GUILayout.Window(node.ID, new Rect(node.X, node.Y, node.Width, node.Height),
                     (id) => { NodeWindowGUI(id, node); }, string.Empty, CanvasStyles.window);
-                node.Height = rect.height;
-                node.Width = rect.width;
+                node.Rect = rect;
 
                 GUI.Box(rect, string.Empty, CanvasStyles.windowShadow);
                 GUI.color = new Color(1, 1, 1, 0.5f);
