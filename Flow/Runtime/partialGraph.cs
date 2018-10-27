@@ -27,17 +27,17 @@ namespace XFlow
 
         public int DrawOrder;
 
-        public float Width;
+        public float Width = 100f;
 
-        public float Height;
+        public float Height = 100f;
 
         public Rect Rect
         {
             get { return new Rect(X, Y, Width, Height); }
             set
             {
-                //X = (int)value.x;
-                //Y = (int)value.y;
+                X = (int)value.x;
+                Y = (int)value.y;
                 Width = value.width;
                 Height = value.height;
             }
