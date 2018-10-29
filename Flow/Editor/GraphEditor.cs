@@ -69,6 +69,8 @@ namespace XFlow
             private const float kZoomMin = 0.4f; // 最小zoom
             private const float kZoomMax = 1.5f; // 最大zoom
             private const float kSize = 5000f; // 窗口大小
+            private static Vector2 blackboardPanelScrollPos;
+            private float blackboardPanelHeight;
 
             int nodeDrawOrder = 0; // 窗口显示顺序
 
@@ -329,8 +331,15 @@ namespace XFlow
             #region Blackboard
             void DrawBlackboard()
             {
+                float x = position.width - 300;
+                float y = 30;
+                float w = 280;
+                float h = Mathf.Max(blackboardPanelHeight, 300);
+                var viewRect = new Rect(x, y, w + 16, Screen.height - y - 30);
+                var r = new Rect(x - 3, y, w, h);
+                blackboardPanelScrollPos = GUI.BeginScrollView(viewRect, blackboardPanelScrollPos, r);
                 Blackboard blackboard = graph.Blackboard;
-                Rect rect = new Rect(position.width - 300, 30, 280, 300);
+                Rect rect = new Rect(position.width - 300, 30, w, h);
                 GUI.Box(rect, string.Empty, CanvasStyles.windowShadow);
                 GUI.color = Color.white;
                 GUILayout.BeginArea(rect, "Variable", CanvasStyles.editorPanel);
@@ -380,8 +389,10 @@ namespace XFlow
                     GUILayout.EndVertical();
 
                 }
-
+                if (e.type == EventType.Repaint)
+                    blackboardPanelHeight = GUILayoutUtility.GetLastRect().yMax + 30;
                 GUILayout.EndArea();
+                GUI.EndScrollView();
             }
             #endregion
 
@@ -521,24 +532,7 @@ namespace XFlow
                                 }
                             }
                         }
-                        else if (e.button == 1)
-                        {
-                            foreach (var itr in PortPos)
-                            {
-                                if (itr.Value.Contains(e.mousePosition))
-                                {
-                                    foreach (var connect in itr.Key.Connections.ToArray())
-                                    {
-                                        connect.sourcePort.Connections.Remove(connect);
-                                        connect.targetPort.Connections.Remove(connect);
-
-                                        graph.Connections.Remove(connect);
-                                    }
-                                    Repaint();
-                                    break;
-                                }
-                            }
-                        }
+                      
                         break;
                     case EventType.MouseUp:
                         if (e.button == 0)
@@ -564,6 +558,23 @@ namespace XFlow
                         }
                         else if (e.button == 1)
                         {
+                            
+                            foreach (var itr in PortPos)
+                            {
+                                if (itr.Value.Contains(e.mousePosition))
+                                {
+                                    foreach (var connect in itr.Key.Connections.ToArray())
+                                    {
+                                        connect.sourcePort.Connections.Remove(connect);
+                                        connect.targetPort.Connections.Remove(connect);
+
+                                        graph.Connections.Remove(connect);
+                                    }
+                                    Repaint();
+                                    return;
+                                }
+                            }
+                            
                             foreach (var node in graph.Nodes.Values)
                             {
                                 if (node.Rect.Contains(e.mousePosition))
