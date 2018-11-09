@@ -22,6 +22,11 @@ namespace XFlow
         public Dictionary<string, FlowIn> FlowInDict { get { return flowInDict; } private set { flowInDict = value; } }
         public Dictionary<string, FlowOut> FlowOutDict { get { return flowOutDict; } private set { flowOutDict = value; } }
 
+        public virtual void Init()
+        {
+
+        }
+
         public virtual void Load(Graph graph, SerNode sn)
         {
             this.graph = graph;
@@ -29,6 +34,7 @@ namespace XFlow
             this.ID = sn.ID;
             this.X = sn.X;
             this.Y = sn.Y;
+            this.ExtraInfo = sn.ExtraInfo;
 
             if (sn.ValueIn != null)
             {

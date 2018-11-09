@@ -17,7 +17,7 @@ namespace XFlow
         Dictionary<int, Node> nodes = new Dictionary<int, Node>();
         public Dictionary<int, Node> Nodes { get { return nodes; } private set { nodes = value; } }
         public List<Connection> Connections = new List<Connection>();
-
+        public GraphOwner GraphOwner;
         public bool LoadByFileName(string fileName)
         {
             this.Name = Path.GetFileName(fileName);

@@ -21,13 +21,14 @@ namespace XFlow
         public List<string> ValueIn;
         public List<string> FlowOut;
         public List<string> FlowIn;
-
-        public void Init(Node node)
+        public string ExtraInfo;
+        public virtual void Init(Node node)
         {
             ID = node.ID;
             Type = node.GetType().ToString();
             X = node.X;
             Y = node.Y;
+            ExtraInfo = node.ExtraInfo;
             if (node.PortValueInDict.Count > 0)
             {
                 ValueOut = new List<string>();

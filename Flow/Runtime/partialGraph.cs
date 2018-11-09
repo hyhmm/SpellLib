@@ -29,7 +29,9 @@ namespace XFlow
 
         public float Width = 100f;
 
-        public float Height = 100f;
+        public float Height = 50;
+
+        public virtual string ExtraInfo { get { return null; } set { } }
 
         public Rect Rect
         {
@@ -79,6 +81,17 @@ namespace XFlow
             PortValueOutDict.Values.ToList().ForEach((x) => x.ClearConnections());
 
         }
+
+        public virtual void OnNodeInspectorGUI()
+        {
+            EditorUtils.ReflectedObjectInspector(this);
+        }
+
+        public virtual string Name
+        {
+            get { return this.GetType().ToString().Split('.').Last(); }
+        }
+
     }
 
     partial class Blackboard
@@ -243,7 +256,12 @@ namespace XFlow
 
         public Node CopyNode(Node node)
         {
-            var clone = (Node)Activator.CreateInstance(node.GetType());
+            return AddNode(node.GetType());
+        }
+
+        public Node AddNode(Type nodeType)
+        {
+            var clone = (Node)Activator.CreateInstance(nodeType);
             clone.Load(this);
             nodes.Add(clone.ID, clone);
             return clone;
@@ -263,18 +281,6 @@ namespace XFlow
             node.RemoveConnection();
         }
     }
-
-    #region Attribute
-    [AttributeUsage(AttributeTargets.All)]
-    public class CategoryAttribute : Attribute
-    {
-        readonly public string category;
-        public CategoryAttribute(string category)
-        {
-            this.category = category;
-        }
-    }
-    #endregion
 
     public static class NodeEditorUtilities
     {

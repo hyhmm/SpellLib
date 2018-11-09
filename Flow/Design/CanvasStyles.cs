@@ -65,5 +65,10 @@ namespace XFlow
         {
             get { return styleSheet.box; }
         }
+
+        public static GUIStyle button
+        {
+            get { return styleSheet.button; }
+        }
     }
 }
