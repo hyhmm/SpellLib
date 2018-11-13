@@ -107,7 +107,7 @@ namespace XFlow
                 get
                 {
                     if (strValue == null)
-                        strValue = ToValueString(Value);
+                        strValue = ValueToString(Value);
                     return strValue;
                 }
                 set
@@ -120,7 +120,7 @@ namespace XFlow
                 }
             }
 
-            public string ToValueString(object value)
+            public string ValueToString(object value)
             {
                 string ret = "";
                 System.Type type = value.GetType();

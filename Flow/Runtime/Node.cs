@@ -36,30 +36,6 @@ namespace XFlow
             this.Y = sn.Y;
             this.ExtraInfo = sn.ExtraInfo;
 
-            if (sn.ValueIn != null)
-            {
-                foreach (var jin in sn.ValueIn)
-                    AddValueInPort(jin);
-            }
-
-            if (sn.ValueOut != null)
-            {
-                foreach (var jout in sn.ValueOut)
-                    AddValueOutPort(jout);
-            }
-
-            if (sn.FlowIn != null)
-            {
-                foreach (var fi in sn.FlowIn)
-                    AddFlowIn(fi);
-            }
-
-            if (sn.FlowOut != null)
-            {
-                foreach (var fo in sn.FlowOut)
-                    AddFlowOut((string)fo);
-            }
-
             this.RegisterPort();
         }
 
@@ -77,16 +53,6 @@ namespace XFlow
             return ret;
         }
 
-        public ValueOut AddValueOutPort(string name)
-        {
-            ValueOut pv = null;
-            if (portValueOutDict.TryGetValue(name, out pv))
-                return pv;
-
-            pv = new ValueOut(this, name);
-            portValueOutDict.Add(name, pv);
-            return pv;
-        }
 
         public ValueOut AddValueOutPort(string name, ValueHandler valueHandler)
         {
@@ -138,18 +104,6 @@ namespace XFlow
             }
 
             fi.SetFlowHandler(flowHandler);
-            return fi;
-        }
-
-        public FlowIn AddFlowIn(string name)
-        {
-            FlowIn fi;
-            if (flowInDict.TryGetValue(name, out fi))
-            {
-                return fi;
-            }
-            fi = new FlowIn(this, name);
-            flowInDict.Add(name, fi);
             return fi;
         }
 

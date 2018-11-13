@@ -17,10 +17,6 @@ namespace XFlow
 
         public string Type;
         public int ID;
-        public List<string> ValueOut;
-        public List<string> ValueIn;
-        public List<string> FlowOut;
-        public List<string> FlowIn;
         public string ExtraInfo;
         public virtual void Init(Node node)
         {
@@ -29,29 +25,6 @@ namespace XFlow
             X = node.X;
             Y = node.Y;
             ExtraInfo = node.ExtraInfo;
-            if (node.PortValueInDict.Count > 0)
-            {
-                ValueOut = new List<string>();
-                ValueOut.AddRange(node.PortValueOutDict.Keys);
-            }
-
-            if (node.PortValueOutDict.Count > 0)
-            {
-                ValueIn = new List<string>();
-                ValueIn.AddRange(node.PortValueInDict.Keys);
-            }
-
-            if (node.FlowInDict.Count > 0)
-            {
-                FlowIn = new List<string>();
-                FlowIn.AddRange(node.FlowInDict.Keys);
-            }
-
-            if (node.FlowOutDict.Count > 0)
-            {
-                FlowOut = new List<string>();
-                FlowOut.AddRange(node.FlowOutDict.Keys);
-            }
         }
     }
 
