@@ -199,28 +199,6 @@ namespace XFlow
         }
     }
 
-    public class IsNullOrEmpty : Node
-    {
-        FlowOut trueFlow;
-        FlowOut falseFlow;
-        public override void RegisterPort()
-        {
-            base.RegisterPort();
-            var obj = AddValueInPort("Obj");
-
-            trueFlow = this.AddFlowOut("True");
-            falseFlow = this.AddFlowOut("False");
-            this.AddFlowIn("In", () => { Invoke(obj); });
-        }
-
-        void Invoke(object obj)
-        {
-            if (obj == null)
-                trueFlow.Call();
-            else
-                falseFlow.Call();
-
-        }
-    }
+   
 }
 

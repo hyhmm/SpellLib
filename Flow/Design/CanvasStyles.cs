@@ -61,6 +61,12 @@ namespace XFlow
             get { return _editorPanel ?? (_editorPanel = styleSheet.GetStyle("editorPanel")); }
         }
 
+        private static GUIStyle _windowHighlight;
+        public static GUIStyle windowHighlight
+        {
+            get { return _windowHighlight ?? (_windowHighlight = styleSheet.GetStyle("windowHighlight")); }
+        }
+
         public static GUIStyle box
         {
             get { return styleSheet.box; }

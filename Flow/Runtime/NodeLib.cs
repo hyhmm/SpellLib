@@ -14,6 +14,8 @@ namespace XFlow
             get { return key; }
             set { key = value; }
         }
+
+        public override string Name { get { return string.IsNullOrEmpty(key) ? "GetVariable" : "$" + key; } }
     }
 
     public class SetVariable : Node
@@ -54,5 +56,24 @@ namespace XFlow
                 falseFlow.Call();
 
         }
+    }
+
+    public class ConstantNode : Node
+    {
+        public string key = "";
+ 
+        public override void RegisterPort()
+        {
+            base.RegisterPort();
+            AddValueOutPort("value", () => { return key; });
+        }
+
+        public override string ExtraInfo
+        {
+            get { return key; }
+            set { this.key = value; }
+        }
+
+        public override string Name { get { return string.IsNullOrEmpty(key) ? "ConstantNode" : key; } }
     }
 }

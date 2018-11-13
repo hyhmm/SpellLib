@@ -188,6 +188,13 @@ namespace XFlow
             GUI.Box(rect, string.Empty, CanvasStyles.windowShadow);
             GUI.color = new Color(1, 1, 1, 0.5f);
             GUI.Box(new Rect(rect.x + 6, rect.y + 6, rect.width, rect.height), string.Empty, CanvasStyles.windowShadow);
+
+            if (node == selectedNode)
+            {
+
+                GUI.color = new Color(0.7f, 0.7f, 1f, 0.8f);
+                GUI.Box(rect, string.Empty, CanvasStyles.windowHighlight);
+            }
         }
 
         void NodeWindowGUI(int id, Node node)
@@ -382,8 +389,6 @@ namespace XFlow
                     string name = EditorGUILayout.DelayedTextField(data.Name, layoutOptions);
                     ChangeBlackDataName(data, name);
 
-                    Debug.Log(data.Name);
-
                     data.StrValue = EditorGUILayout.DelayedTextField(data.StrValue, layoutOptions);
 
                     if (GUILayout.Button("-"))
@@ -555,7 +560,6 @@ namespace XFlow
                         {
                             draggedNode.X += (int)e.delta.x;
                             draggedNode.Y += (int)e.delta.y;
-                            Debug.Log(draggedNode.X + "," + draggedNode.Y);
                         }
                     }
                     break;

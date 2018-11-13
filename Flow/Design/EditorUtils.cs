@@ -16,10 +16,9 @@ namespace XFlow
             {
                 return;
             }
-
+    
             foreach (var field in target.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
-
                 //hide type altogether?
                 if (field.FieldType.IsDefined(typeof(HideInInspector), true))
                 {
