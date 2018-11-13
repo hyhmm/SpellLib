@@ -7,8 +7,12 @@ namespace XFlow
 {
     public class SpellAgent : GraphOwner
     {
-        public event Action<SpellAgent> SpellStartEvent;
-        public event Action<SpellAgent> ActionStartEvent;
+        public event Action OnSpellStart;
+        public event Action OnActionStart;
+        public event Action OnOwnerDied;
+        public event Action OnBulletHit;
+        public event Action OnAttackLand;
+
         public List<Unit> SpellTargets;
         public Vector2 FirePos;
         Graph graph;
@@ -17,19 +21,19 @@ namespace XFlow
         public void Start()
         {
             graph = new Graph();
-            graph.Load(GraphName);
+            graph.LoadByFileName(GraphName);
         }
 
         public void DispatchSpellStart()
         {
-            if (SpellStartEvent != null)
-                SpellStartEvent(this);
+            if (OnSpellStart != null)
+                OnSpellStart();
         }
 
         public void DispatchActionStart()
         {
-            if (ActionStartEvent != null)
-                ActionStartEvent(this);
+            if (OnActionStart != null)
+                OnActionStart();
         }
     }
 }

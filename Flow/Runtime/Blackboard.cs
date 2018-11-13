@@ -10,13 +10,6 @@ namespace XFlow
         Dictionary<string, object> dataSource = new Dictionary<string, object>();
         public Dictionary<string, object> DataSource { get { return dataSource; } private set { dataSource = value; } }
 
-        public void OnRegiserPort(Node node)
-        {
-            foreach (var data in dataSource)
-            {
-                node.AddValueOutPort(data.Key, () => { return GetData(data.Key); });
-            }
-        }
         public void Load(SerBlackboard sb)
         {
             foreach (var value in sb.Values)

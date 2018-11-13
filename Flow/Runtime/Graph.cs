@@ -13,27 +13,31 @@ namespace XFlow
     {
         public string Name;
         public Blackboard Blackboard { get; private set; }
-        private Node blackboardNode;
         Dictionary<int, Node> nodes = new Dictionary<int, Node>();
         public Dictionary<int, Node> Nodes { get { return nodes; } private set { nodes = value; } }
         public List<Connection> Connections = new List<Connection>();
-        public GraphOwner GraphOwner;
-        public bool LoadByFileName(string fileName)
+        public GraphOwner Owner;
+        public void LoadByFileName(string fileName)
         {
             this.Name = Path.GetFileName(fileName);
             TextAsset ta = Resources.Load<TextAsset>(fileName);
-            return Load(ta.text);
+            Load(ta.text);
+            Init();
         }
 
-        public bool Load(SerGraph sg)
+        void Init()
+        {
+            foreach (var node in Nodes.Values)
+                node.Init();
+        }
+
+        public void Load(SerGraph sg)
         {
             // 加载blackboard
             if (sg.Blackboard != null)
             {
                 Blackboard = new Blackboard();
-                blackboardNode = new Node();
                 Blackboard.Load(sg.Blackboard);
-                Blackboard.OnRegiserPort(blackboardNode);
             }
 
             foreach (var sn in sg.Nodes)
@@ -49,25 +53,18 @@ namespace XFlow
                 connection.Connect(connect.Type, connect.Source, connect.SourcePort, connect.Target, connect.TargetPort);
                 Connections.Add(connection);
             }
-
-            return true;
         }
 
-        public bool Load(string content)
+        public void Load(string content)
         {
             Blackboard = new Blackboard();
             SerGraph sg = JsonConvert.DeserializeObject<SerGraph>(content);
 
-            return Load(sg);
+            Load(sg);
         }
 
         public Node GetNode(int id)
-        {
-            if (id == 0)
-            {
-                return blackboardNode;
-            }
-
+        { 
             if (nodes.ContainsKey(id))
                 return nodes[id];
 

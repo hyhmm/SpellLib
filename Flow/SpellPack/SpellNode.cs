@@ -4,31 +4,29 @@ namespace XFlow
 {
     #region event
 
-    [Category("Spell/Event/SpellStart")]
-    public class SpellStart : Node
+    [Category("Spell/Event/OnSpellStart")]
+    public class OnSpellStart : Node
     {
+        FlowOut o;
         public override void RegisterPort()
         {
-            AddFlowOut("Out");
+            o = AddFlowOut("Out");
         }
 
         public override void Init()
         {
-            var sa = graph.GraphOwner as SpellAgent;
-            sa.SpellStartEvent += Invoke;
-        }
-
-        void Invoke(SpellAgent sa)
-        {
-            this.GetFlowOut("Out").Call();
+            var sa = graph.Owner as SpellAgent;
+            sa.OnSpellStart += ()=> o.Call();
         }
     }
 
+    [Category("Spell/SpellAgent")]
     public class SpellAgentNode : Node
     {
         protected SpellAgent spellAgent;
         public override void RegisterPort()
         {
+            spellAgent = graph.Owner as SpellAgent;
             AddValueOutPort("SpellAgent", () => { return spellAgent; });
             AddValueOutPort("SpellTarget", () => { return spellAgent.SpellTargets; });
             AddValueOutPort("FirePos", () => { return spellAgent.FirePos; });
@@ -36,31 +34,104 @@ namespace XFlow
     }
 
     [Category("Spell/Event/ActionStart")]
-    public class ActionStart : Node
+    public class OnActionStart : Node
     {
+        FlowOut o;
         public override void RegisterPort()
         {
-            AddFlowOut("Out");
+            o = AddFlowOut("Out");
         }
 
         public override void Init()
         {
-            var sa = graph.GraphOwner as SpellAgent;
-            sa.SpellStartEvent += Invoke;
-        }
-
-        void Invoke(SpellAgent sa)
-        {
-            this.GetFlowOut("Out").Call();
+            var sa = graph.Owner as SpellAgent;
+            sa.OnSpellStart += () => o.Call();
         }
     }
 
+
+    #region t1
+    public class OnUpdate : Node
+    {
+        FlowOut o;
+        public override void RegisterPort()
+        {
+            base.RegisterPort();
+            this.AddValueInPort("UpdateInterval");
+            o = this.AddFlowOut("Out");
+            //timer.Timeout(dt, Update);
+        }
+
+        void Update()
+        {
+            o.Call();
+            //time.Timeout(dt, Update);
+        }
+        
+    }
+
+    public class OnCreate : Node
+    {
+        FlowOut o;
+        public override void RegisterPort()
+        {
+            base.RegisterPort();
+            o = AddFlowOut("Out");
+        }
+
+        public override void Init()
+        {
+            o.Call();
+        }
+    }
+
+    public class OnAttackLand : Node
+    {
+        FlowOut o;
+        public override void RegisterPort()
+        {
+            base.RegisterPort();
+            o = AddFlowOut("Out");
+        }
+
+        public override void Init()
+        {
+            SpellAgent sa = graph.Owner as SpellAgent;
+            sa.OnAttackLand += () => o.Call();
+        }
+    }
+
+    public class OnDestroy : Node
+    {
+
+    }
+
+    public class OnKill : Node
+    {
+
+    }
+
+    public class OnDealDamage : Node
+    {
+
+    }
     #endregion
 
+    #endregion
+    
+
+    public class AddAbility : Node
+    {
+
+    }
+
+    public class AttachEffect : Node
+    {
+
+    }
 
 
     [Category("Spell/TakeDamage")]
-    [Description("伤害方式来的范德萨")]
     public class TakeDamage : Node
     {
         public override void RegisterPort()
