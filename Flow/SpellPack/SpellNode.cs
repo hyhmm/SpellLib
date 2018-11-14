@@ -103,18 +103,37 @@ namespace XFlow
 
     public class OnDestroy : Node
     {
+        FlowOut o;
+        public override void RegisterPort()
+        {
+            base.RegisterPort();
+            o = AddFlowOut("Out");
+        }
 
+        public override void Destroy()
+        {
+            base.Destroy();
+            o.Call();
+        }
     }
 
     public class OnKill : Node
     {
+        FlowOut o;
+        public override void RegisterPort()
+        {
+            base.RegisterPort();
+            o = AddFlowOut("Out");
+        }
 
+        public override void Init()
+        {
+            base.Init();
+            SpellAgent sa = graph.Owner as SpellAgent;
+            sa.OnKill += () => o.Call();
+        }
     }
 
-    public class OnDealDamage : Node
-    {
-
-    }
     #endregion
 
     #endregion

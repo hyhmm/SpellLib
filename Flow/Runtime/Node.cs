@@ -27,6 +27,11 @@ namespace XFlow
 
         }
 
+        public virtual void Destroy()
+        {
+
+        }
+
         public virtual void Load(Graph graph, SerNode sn)
         {
             this.graph = graph;
