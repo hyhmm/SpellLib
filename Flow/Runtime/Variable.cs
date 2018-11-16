@@ -6,12 +6,12 @@ namespace XFlow
 {
     public class Variable
     {
-
+        public object Value;
     }
 
     public class Variable<T> : Variable
     {
-        public T Value;
+        new public T Value;
     }
 
     public class FloatVariable : Variable<float>

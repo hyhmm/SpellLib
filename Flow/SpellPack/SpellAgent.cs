@@ -16,13 +16,24 @@ namespace XFlow
 
         public List<Unit> SpellTargets;
         public Vector2 FirePos;
-        Graph graph;
+        public Graph Graph { get; private set; }
         public string GraphName;
 
-        public void Start()
+        public void Awake()
         {
-            graph = new Graph();
-            graph.LoadByFileName(GraphName);
+            Graph = new Graph();
+            Graph.Owner = this;
+            Graph.LoadByFileName(GraphName);
+        }
+
+        public void StartSkill()
+        {
+            DispatchSpellStart();
+        }
+
+        public void StartAction()
+        {
+            DispatchActionStart();
         }
 
         public void DispatchSpellStart()
@@ -53,6 +64,16 @@ namespace XFlow
         {
             if (OnAttackLand != null)
                 OnAttackLand();
+        }
+
+        public bool IsReady()
+        {
+            Debug.Log(this.Graph.Blackboard["Active"]);
+            Debug.Log(this.Graph.Blackboard["Active"].GetType());
+            if ((long)(this.Graph.Blackboard["Active"]) == 0)
+                return false;
+
+            return true;
         }
     }
 }

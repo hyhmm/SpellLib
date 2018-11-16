@@ -49,8 +49,7 @@ namespace XFlow
         }
     }
 
-
-    #region t1
+    [Category("Spell/Event/OnUpdate")]
     public class OnUpdate : Node
     {
         FlowOut o;
@@ -70,6 +69,7 @@ namespace XFlow
         
     }
 
+    [Category("Spell/Event/OnCreate")]
     public class OnCreate : Node
     {
         FlowOut o;
@@ -85,6 +85,7 @@ namespace XFlow
         }
     }
 
+    [Category("Spell/Event/OnAttackLand")]
     public class OnAttackLand : Node
     {
         FlowOut o;
@@ -101,6 +102,7 @@ namespace XFlow
         }
     }
 
+    [Category("Spell/Event/OnDestroy")]
     public class OnDestroy : Node
     {
         FlowOut o;
@@ -117,6 +119,7 @@ namespace XFlow
         }
     }
 
+    [Category("Spell/Event/OnKill")]
     public class OnKill : Node
     {
         FlowOut o;
@@ -134,23 +137,22 @@ namespace XFlow
         }
     }
 
-    #endregion
+    #endregion   
 
-    #endregion
-    
-
+    [Category("Spell/Action/AddAbility")]
     public class AddAbility : Node
     {
 
     }
 
+    [Category("Spell/Action/AttachEffect")]
     public class AttachEffect : Node
     {
 
     }
 
 
-    [Category("Spell/TakeDamage")]
+    [Category("Spell/Action/TakeDamage")]
     public class TakeDamage : Node
     {
         public override void RegisterPort()
@@ -159,7 +161,7 @@ namespace XFlow
             var target = this.AddValueInPort("Target");
             var damage = this.AddValueInPort("Damage");
             var o = this.AddFlowOut("out");
-            this.AddFlowIn("In", () => { Invoke(target.Value as List<Unit>, (float)damage.Value); o.Call(); });
+            this.AddFlowIn("In", () => {/* Invoke(target.Value as List<Unit>, (float)damage.Value);*/ o.Call(); });
         }
 
         public void Invoke(List<Unit> target, float damage)
@@ -171,6 +173,7 @@ namespace XFlow
         }
     }
 
+    [Category("Spell/Action/SpawnTower")]
     public class SpawnTower : Node
     {
         public override void RegisterPort()
@@ -190,6 +193,7 @@ namespace XFlow
         }
     }
 
+    [Category("Spell/Action/AddBuff")]
     public class AddBuff : Node
     {
         public override void RegisterPort()
@@ -208,6 +212,7 @@ namespace XFlow
         }
     }
 
+    [Category("Spell/Action/FindOptionTarget")]
     public class FindOptionTarget : Node
     {
         List<Unit> Targets;
@@ -229,6 +234,26 @@ namespace XFlow
         }
     }
 
+    public class PlayAnim : Node
+    {
+        public override void RegisterPort()
+        {
+            base.RegisterPort();
+            var animName = AddValueInPort("AnimName");
+            var o = this.AddFlowOut("Out");
+            this.AddFlowIn("In", () => { Invoke(animName.Value); o.Call(); });
+        }
+
+        void Invoke(object anim)
+        {
+            var animation = graph.Owner.GetComponent<UnityEngine.Animation>();
+            animation.Play((string)anim);
+            animation.CrossFadeQueued("stand", 0.2f, UnityEngine.QueueMode.CompleteOthers);
+
+        }
+    }
+
+    [Category("Spell/Action/FindTargetInCircle")]
     public class FindTargetInCircle : Node
     {
         List<Unit> Targets;
@@ -252,6 +277,7 @@ namespace XFlow
         }
     }
 
+    [Category("Spell/Action/FireEffect")]
     public class FireEffect : Node
     {
         public override void RegisterPort()
@@ -270,6 +296,7 @@ namespace XFlow
         }
     }
 
+    [Category("Spell/Action/Delay")]
     public class Delay : Node
     {
         FlowOut o;

@@ -109,7 +109,7 @@ namespace XFlow
         public static bool OnOpen(int instanceID, int line)
         {
             string path = AssetDatabase.GetAssetPath(EditorUtility.InstanceIDToObject(instanceID));
-            if (path.EndsWith(".ue"))
+            if (path.Contains(".ue."))
             {
                 filePath = Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, path);
                 string data = Util.ReadTextFile(path);
