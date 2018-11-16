@@ -31,7 +31,7 @@ namespace XFlow
     public class SerValue
     {
         public string Name;
-        public object Value;
+        public Variable Value;
     }
 
     public class SerBlackboard

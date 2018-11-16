@@ -41,7 +41,7 @@ namespace XFlow
             targetPort.Connections.Add(this);
         }
 
-        public object Value
+        public Variable Value
         {
             get
             {

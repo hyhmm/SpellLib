@@ -7,8 +7,8 @@ namespace XFlow
 {
     public partial class Blackboard
     {
-        Dictionary<string, object> dataSource = new Dictionary<string, object>();
-        public Dictionary<string, object> DataSource { get { return dataSource; } private set { dataSource = value; } }
+        Dictionary<string, Variable> dataSource = new Dictionary<string, Variable>();
+        public Dictionary<string, Variable> DataSource { get { return dataSource; } private set { dataSource = value; } }
 
         public void Load(SerBlackboard sb)
         {
@@ -18,6 +18,7 @@ namespace XFlow
             }
         }
 
+        /*
         public T GetData<T>(string name)
         {
             if (dataSource.ContainsKey(name))
@@ -25,30 +26,30 @@ namespace XFlow
 
             Debug.LogErrorFormat("cant find data by name:{0}", name);
             return default(T);
-        }
+        }*/
 
-        public object GetData(string name)
+        public Variable GetData(string name)
         {
             if (dataSource.ContainsKey(name))
                 return dataSource[name];
 
             Debug.LogErrorFormat("cant find data by name:{0}", name);
-            return default(object);
+            return default(Variable);
         }
 
-        public void AddData(string name, object data)
+        public void AddData(string name, Variable data)
         {
             if (dataSource.ContainsKey(name))
                 Debug.LogWarningFormat("already exists name:{0}", name);
             dataSource[name] = data;
         }
 
-        public void SetData(string name, object data)
+        public void SetData(string name, Variable data)
         {
             dataSource[name] = data;
         }
 
-        public object this[string name]
+        public Variable this[string name]
         {
             get { return GetData(name); }
             set { SetData(name, value); }

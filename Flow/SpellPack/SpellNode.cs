@@ -23,10 +23,10 @@ namespace XFlow
     [Category("Spell/SpellAgent")]
     public class SpellAgentNode : Node
     {
-        protected SpellAgent spellAgent;
+        protected Variable spellAgent = new Variable();
         public override void RegisterPort()
         {
-            spellAgent = graph.Owner as SpellAgent;
+            spellAgent.Value = graph.Owner;
             AddValueOutPort("SpellAgent", () => { return spellAgent; });
             AddValueOutPort("SpellTarget", () => { return spellAgent.SpellTargets; });
             AddValueOutPort("FirePos", () => { return spellAgent.FirePos; });

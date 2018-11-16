@@ -68,11 +68,9 @@ namespace XFlow
 
         public bool IsReady()
         {
-            Debug.Log(this.Graph.Blackboard["Active"]);
-            Debug.Log(this.Graph.Blackboard["Active"].GetType());
-            if ((long)(this.Graph.Blackboard["Active"]) == 0)
+            BoolVariable isActive = this.Graph.Blackboard["Active"] as BoolVariable;
+            if ((bool)isActive)
                 return false;
-
             return true;
         }
     }

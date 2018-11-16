@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace XFlow
 {
-    public delegate object ValueHandler();
+    public delegate Variable ValueHandler();
     public delegate void FlowHandler();
     public partial class Port
     {
@@ -44,7 +44,7 @@ namespace XFlow
             this.valueHandler = valueHandler;
         }
 
-        public object Value
+        public Variable Value
         {
             get { return valueHandler(); }
         }

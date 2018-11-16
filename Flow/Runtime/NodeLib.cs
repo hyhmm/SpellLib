@@ -60,20 +60,20 @@ namespace XFlow
 
     public class ConstantNode : Node
     {
-        public string key = "";
+        public StringVariable Key = "";
  
         public override void RegisterPort()
         {
             base.RegisterPort();
-            AddValueOutPort("value", () => { return key; });
+            AddValueOutPort("value", () => { return Key; });
         }
 
         public override string ExtraInfo
         {
-            get { return key; }
-            set { this.key = value; }
+            get { return Key.Value; }
+            set { this.Key = value; }
         }
 
-        public override string Name { get { return string.IsNullOrEmpty(key) ? "ConstantNode" : key; } }
+        public override string Name { get { return string.IsNullOrEmpty(Key.Value) ? "ConstantNode" : Key.Value; } }
     }
 }

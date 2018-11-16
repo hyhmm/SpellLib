@@ -99,7 +99,7 @@ namespace XFlow
         public class Data
         {
             public string Name;
-            public object Value;
+            public Variable Value;
 
             private string strValue = null;
             public string StrValue
@@ -107,7 +107,7 @@ namespace XFlow
                 get
                 {
                     if (strValue == null)
-                        strValue = ValueToString(Value);
+                        strValue = Value.ToString();
                     return strValue;
                 }
                 set
@@ -116,51 +116,8 @@ namespace XFlow
                         return;
 
                     strValue = value;
-                    Value = ToValue(strValue);
+                    Value.FromString(strValue);
                 }
-            }
-
-            public string ValueToString(object value)
-            {
-                string ret = "";
-                System.Type type = value.GetType();
-                if (type.IsArray || typeof(IEnumerable).IsAssignableFrom(type))
-                {
-                    var v = (IEnumerable)value;
-                    foreach (var iv in v)
-                    {
-                        ret += iv + ",";
-                    }
-                    return ret.Remove(ret.LastIndexOf(','));
-                }
-                else
-                {
-                    return value.ToString();
-                }
-            }
-
-            public object ToValue(string strValue)
-            {
-                object value;
-                if (strValue.Contains(","))
-                {
-                    if (strValue.Contains("."))
-                    {
-                        value = Util.ConvertListItemsFromString<float>(strValue);
-                    }
-                    else
-                    {
-                        value = Util.ConvertListItemsFromString<int>(strValue);
-                    }
-                }
-                else
-                {
-                    if (strValue.Contains("."))
-                        value = float.Parse(strValue);
-                    else
-                        value = int.Parse(strValue);
-                }
-                return value;
             }
         }
 
