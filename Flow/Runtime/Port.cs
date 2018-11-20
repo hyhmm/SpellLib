@@ -24,7 +24,7 @@ namespace XFlow
             this.name = name;
         }
 
-        public object Value
+        public Variable Value
         {
             get { return Connections[0].Value; }
         }

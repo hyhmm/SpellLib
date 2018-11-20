@@ -146,8 +146,7 @@ namespace XFlow
         {
             ShowDataList.Add(new Data()
             {
-                Name = GetNewName("New"),
-                Value = 0
+                Name = GetNewName("New")
             });
         }
 

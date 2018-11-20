@@ -6,22 +6,12 @@ namespace XFlow
 {
     public class Variable
     {
-        public object Value;
-
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-
-        public virtual void FromString(string str)
-        {
-            Value = str;
-        }
+        public virtual void FromString(string str) { }
     }
 
     public class Variable<T> : Variable
     {
-        new public T Value;
+        public T Value;
     }
 
     public class BoolVariable : Variable<bool>
@@ -89,4 +79,20 @@ namespace XFlow
             Value = Util.ConvertListItemsFromString<float>(str);
         }
     }
+
+    public class ListUnitVariable : Variable<List<Unit>>
+    {
+        public static implicit operator ListUnitVariable(List<Unit> value) { return new ListUnitVariable { Value = value }; }
+    }
+
+    public class Vector2Variable : Variable<UnityEngine.Vector2>
+    {
+        public static implicit operator Vector2Variable(UnityEngine.Vector2 value) { return new Vector2Variable { Value = value }; }
+    }
+
+    public class SpellAgentVariable : Variable<SpellAgent>
+    {
+        public static implicit operator SpellAgentVariable(SpellAgent value) { return new SpellAgentVariable { Value = value }; }
+    }
+
 }

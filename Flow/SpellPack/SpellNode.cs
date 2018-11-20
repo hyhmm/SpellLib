@@ -23,13 +23,13 @@ namespace XFlow
     [Category("Spell/SpellAgent")]
     public class SpellAgentNode : Node
     {
-        protected Variable spellAgent = new Variable();
+        protected SpellAgentVariable spellAgent;
         public override void RegisterPort()
         {
-            spellAgent.Value = graph.Owner;
+            spellAgent = graph.Owner as SpellAgent;
             AddValueOutPort("SpellAgent", () => { return spellAgent; });
-            AddValueOutPort("SpellTarget", () => { return spellAgent.SpellTargets; });
-            AddValueOutPort("FirePos", () => { return spellAgent.FirePos; });
+            AddValueOutPort("SpellTarget", () => { return spellAgent.Value.SpellTargets; });
+            AddValueOutPort("FirePos", () => { return spellAgent.Value.FirePos; });
         }
     }
 
@@ -184,10 +184,11 @@ namespace XFlow
             var attackRate = AddValueInPort("AttackRate");
             var spawnPos = AddValueInPort("SpawnPos");
             var o = this.AddFlowOut("Out");
-            this.AddFlowIn("In", () => { Invoke((int)towerId.Value, (int)duration.Value, (int)attackRate.Value, (UnityEngine.Vector2)spawnPos.Value); o.Call(); });
+            this.AddFlowIn("In", () => { Invoke(towerId.Value as IntVariable, duration.Value as IntVariable, attackRate.Value as IntVariable, 
+               spawnPos.Value as Vector2Variable); o.Call(); });
         }
 
-        public void Invoke(int towerId, int duration, int attackRate, UnityEngine.Vector2 position)
+        public void Invoke(IntVariable towerId, IntVariable duration, IntVariable attackRate, Vector2Variable position)
         {
 
         }
@@ -203,10 +204,10 @@ namespace XFlow
             var buffId = AddValueInPort("BuffId");
             var duration = AddValueInPort("Duration");
             var o = this.AddFlowOut("Out");
-            this.AddFlowIn("In", () => { Invoke(targets.Value, (int)buffId.Value, (int)duration.Value); o.Call(); });
+            this.AddFlowIn("In", () => { Invoke(targets.Value as ListUnitVariable, buffId.Value as IntVariable, duration.Value as FloatVariable); o.Call(); });
         }
 
-        public void Invoke(object targets, int buffId, int duration)
+        public void Invoke(ListUnitVariable targets, IntVariable buffId, FloatVariable duration)
         {
 
         }
@@ -215,7 +216,7 @@ namespace XFlow
     [Category("Spell/Action/FindOptionTarget")]
     public class FindOptionTarget : Node
     {
-        List<Unit> Targets;
+        ListUnitVariable Targets;
         public override void RegisterPort()
         {
             base.RegisterPort();
@@ -256,7 +257,7 @@ namespace XFlow
     [Category("Spell/Action/FindTargetInCircle")]
     public class FindTargetInCircle : Node
     {
-        List<Unit> Targets;
+        ListUnitVariable Targets;
         public override void RegisterPort()
         {
             base.RegisterPort();

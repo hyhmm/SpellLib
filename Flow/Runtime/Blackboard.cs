@@ -18,16 +18,6 @@ namespace XFlow
             }
         }
 
-        /*
-        public T GetData<T>(string name)
-        {
-            if (dataSource.ContainsKey(name))
-                return (T)dataSource[name];
-
-            Debug.LogErrorFormat("cant find data by name:{0}", name);
-            return default(T);
-        }*/
-
         public Variable GetData(string name)
         {
             if (dataSource.ContainsKey(name))

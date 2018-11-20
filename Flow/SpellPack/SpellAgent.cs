@@ -14,8 +14,8 @@ namespace XFlow
         public event Action OnAttackLand;
         public event Action OnKill;
 
-        public List<Unit> SpellTargets;
-        public Vector2 FirePos;
+        public ListUnitVariable SpellTargets;
+        public Vector2Variable FirePos;
         public Graph Graph { get; private set; }
         public string GraphName;
 
