@@ -96,6 +96,7 @@ namespace XFlow
 
     partial class Blackboard
     {
+        /*
         public class Data
         {
             public string Name;
@@ -119,42 +120,61 @@ namespace XFlow
                     Value.FromString(strValue);
                 }
             }
+        }*/
+
+        public List<string> DataKeyList = new List<string>();
+
+        public void AddVariable(VariableType vt)
+        {
+            string name = GetNewName("default");
+            this.AddVariable(GetNewName("default"), vt);
+            DataKeyList.Add(name);
         }
 
-        List<Data> showDataList;
-        public List<Data> ShowDataList
+        public void RemoveVariable(string name)
         {
-            get
+            dataSource.Remove(name);
+            DataKeyList.Remove(name);
+        }
+
+        public void Rename(string oldName, string newName)
+        {
+            int idx = DataKeyList.FindIndex((x) => x == oldName);
+            DataKeyList[idx] = newName;
+
+            var v = dataSource[oldName];
+            dataSource[newName] = v;
+        }
+
+        public void AddVariable(string name, VariableType vt)
+        {
+            Variable v = null;
+            switch (vt)
             {
-                if (showDataList == null)
-                {
-                    showDataList = new List<Data>();
-                    foreach (var itr in DataSource)
-                    {
-                        showDataList.Add(new Data()
-                        {
-                            Name = itr.Key,
-                            Value = itr.Value
-                        });
-                    }
-                }
-                return showDataList;
+                case VariableType.Int:
+                    v = new IntVariable();
+                    break;
+                case VariableType.Float:
+                    v = new FloatVariable();
+                    break;
+                case VariableType.ListInt:
+                    v = new ListIntVariable();
+                    break;
+                case VariableType.ListFloat:
+                    v = new ListFloatVariable();
+                    break;
+                default:
+                    break;
             }
-        }
 
-        public void AddShowData()
-        {
-            ShowDataList.Add(new Data()
-            {
-                Name = GetNewName("New")
-            });
+            AddData(name, v);
         }
 
         string GetNewName(string name)
         {
-            foreach (var data in this.ShowDataList)
+            foreach (var key in this.DataSource.Keys)
             {
-                if (data.Name == name)
+                if (key == name)
                 {
                     return GetNewName(name + "1");
                 }

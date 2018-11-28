@@ -8,4 +8,13 @@ namespace XFlow
         Flow,
         Value
     }
+
+    public enum VariableType
+    {
+        Int,
+        Float,
+        ListInt,
+        ListFloat,
+        String,
+    }
 }

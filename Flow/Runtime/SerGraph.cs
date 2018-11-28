@@ -40,13 +40,13 @@ namespace XFlow
 
         public void Init(Blackboard blackboard)
         {
-            if (blackboard.ShowDataList.Count > 0)
+            if (blackboard.DataKeyList.Count > 0)
             {
-                foreach (var iter in blackboard.ShowDataList)
+                foreach (var name in blackboard.DataKeyList)
                 {
                     SerValue sv = new SerValue();
-                    sv.Name = iter.Name;
-                    sv.Value = iter.Value;
+                    sv.Name = name;
+                    sv.Value = blackboard.GetData(name);
                     Values.Add(sv);
                 }
             }
@@ -129,7 +129,8 @@ namespace XFlow
         {
             SerGraph sg = new SerGraph();
             sg.Init(this);
-            return JsonConvert.SerializeObject(sg, Formatting.Indented);
+            JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
+            return JsonConvert.SerializeObject(sg, Formatting.Indented, settings);
         }
     }
 }

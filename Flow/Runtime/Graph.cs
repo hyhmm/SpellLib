@@ -58,6 +58,7 @@ namespace XFlow
         public void Load(string content)
         {
             Blackboard = new Blackboard();
+            JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
             SerGraph sg = JsonConvert.DeserializeObject<SerGraph>(content);
 
             Load(sg);

@@ -359,9 +359,11 @@ namespace XFlow
             GUI.skin.label.richText = true;
             var e = Event.current;
             GUI.backgroundColor = new Color(0.8f, 0.8f, 1);
+
+
             if (GUILayout.Button("Add Variable"))
             {
-                blackboard.AddShowData();
+                ShowAddVariableContextMenu();
                 Event.current.Use();
             }
             GUI.backgroundColor = Color.white;
@@ -381,19 +383,30 @@ namespace XFlow
 
                 GUILayout.BeginVertical();
 
-                for (int i = blackboard.ShowDataList.Count - 1; i >= 0; i--)
+                for (int i = blackboard.DataKeyList.Count - 1; i >= 0; i--)
                 {
-                    var data = blackboard.ShowDataList[i];
+                    var name = blackboard.DataKeyList[i];
                     GUILayout.BeginHorizontal();
 
-                    string name = EditorGUILayout.DelayedTextField(data.Name, layoutOptions);
-                    ChangeBlackDataName(data, name);
+                    Variable v = blackboard.GetData(name);
 
-                    data.StrValue = EditorGUILayout.DelayedTextField(data.StrValue, layoutOptions);
+                    string newName = EditorGUILayout.DelayedTextField(name, layoutOptions);
+                    bool changedName = TryChangeBlackDataName(name, newName);
+
+                    string nowName = changedName ? newName : name;
+
+                    string oldValue = v.ToString();
+                    string newValue = EditorGUILayout.DelayedTextField(oldValue, layoutOptions);
+                    if (oldValue != newValue)
+                    {
+                       
+                        v.FromString(newValue);
+                        blackboard.SetData(nowName, v);
+                    }
 
                     if (GUILayout.Button("-"))
                     {
-                        blackboard.ShowDataList.RemoveAt(i);
+                        blackboard.RemoveVariable(nowName);
                     }
 
                     GUILayout.EndHorizontal();
@@ -407,47 +420,18 @@ namespace XFlow
             GUI.EndScrollView();
         }
 
-        void ChangeBlackDataName(Blackboard.Data data, string name)
+        bool TryChangeBlackDataName(string oldName, string newName)
         {
-            if (data.Name == name)
-                return;
+            if (oldName == newName)
+                return false;
 
-            bool sameName = false;
-            foreach (var d in graph.Blackboard.ShowDataList)
-            {
-                if (d == data)
-                    continue;
-                if (d.Name == name)
-                {
-                    sameName = true;
-                    break;
-                }
-            }
-
-            if (sameName)
+            if (graph.Blackboard.DataSource.Keys.Select(x => x == newName).ToList().Count > 1)
             {
                 tips.AddError("不能是相同的名字");
-                return;
+                return false;
             }
-
-            // 改GetVariable和SetVariable的名字
-            foreach (var node in graph.Nodes.Values)
-            {
-                if (node is GetVariable)
-                {
-                    GetVariable gv = node as GetVariable;
-                    if (gv.key == data.Name)
-                        gv.key = name;
-                }
-                else if (node is SetVariable)
-                {
-                    SetVariable sv = node as SetVariable;
-                    if (sv.key == data.Name)
-                        sv.key = name;
-                }
-            }
-
-            data.Name = name;
+            graph.Blackboard.Rename(oldName, newName);
+            return true;
         }
 
         #endregion
@@ -650,6 +634,19 @@ namespace XFlow
         #endregion
 
         #region contextMenu
+        void ShowAddVariableContextMenu()
+        {
+            GenericMenu contextMenu = new GenericMenu();
+            foreach (VariableType vt in Enum.GetValues(typeof(VariableType)))
+            {
+                contextMenu.AddItem(new GUIContent(vt.ToString()), false, () =>
+                {
+                    graph.Blackboard.AddVariable(vt);
+                });
+            }
+            contextMenu.ShowAsContext();
+        }
+
         void ShowNodeContextMenu(Node node)
         {
             GenericMenu contextMenu = new GenericMenu();
