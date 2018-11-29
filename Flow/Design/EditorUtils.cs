@@ -99,5 +99,21 @@ namespace XFlow
             }
             return value;
         }
+
+        static public string GetVariableType(Variable v)
+        {
+            if (v is IntVariable)
+                return VariableType.Int.ToString();
+            if (v is FloatVariable)
+                return VariableType.Float.ToString();
+            if (v is ListIntVariable)
+                return VariableType.ListInt.ToString();
+            if (v is ListFloatVariable)
+                return VariableType.ListFloat.ToString();
+            if (v is StringVariable)
+                return VariableType.String.ToString();
+
+            return v.GetType().ToString();
+        }
      }
 }

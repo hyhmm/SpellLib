@@ -7,11 +7,14 @@ namespace XFlow
     public class Variable
     {
         public virtual void FromString(string str) { }
+        public object Value;
+        public void SetValue(object value) { Value = value; }
+        public object GetValue() { return Value; }
     }
 
     public class Variable<T> : Variable
     {
-        public T Value;
+        public new T Value;
     }
 
     public class BoolVariable : Variable<bool>
@@ -25,6 +28,10 @@ namespace XFlow
         {
             Value = bool.Parse(str);
         }
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 
     public class FloatVariable : Variable<float>
@@ -33,6 +40,10 @@ namespace XFlow
         public override void FromString(string str)
         {
             Value = float.Parse(str);
+        }
+        public override string ToString()
+        {
+            return Value.ToString();
         }
     }
 
@@ -43,11 +54,25 @@ namespace XFlow
         {
             Value = int.Parse(str);
         }
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 
     public class StringVariable : Variable<string>
     {
         public static implicit operator StringVariable(string value) { return new StringVariable { Value = value }; }
+        public override void FromString(string str)
+        {
+            Value = str;
+        }
+        public override string ToString()
+        {
+            if (Value == null)
+                return "";
+            return Value.ToString();
+        }
     }
 
     public class ListIntVariable : Variable<List<int>>
@@ -56,6 +81,8 @@ namespace XFlow
 
         public override string ToString()
         {
+            if (Value == null)
+                return "";
             return string.Join(",", Value.ConvertAll(x => x.ToString()).ToArray());
         }
 
@@ -71,6 +98,8 @@ namespace XFlow
 
         public override string ToString()
         {
+            if (Value == null)
+                return "";
             return string.Join(",", Value.ConvertAll(x => x.ToString()).ToArray());
         }
 

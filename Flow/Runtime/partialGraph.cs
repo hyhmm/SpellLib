@@ -96,32 +96,6 @@ namespace XFlow
 
     partial class Blackboard
     {
-        /*
-        public class Data
-        {
-            public string Name;
-            public Variable Value;
-
-            private string strValue = null;
-            public string StrValue
-            {
-                get
-                {
-                    if (strValue == null)
-                        strValue = Value.ToString();
-                    return strValue;
-                }
-                set
-                {
-                    if (strValue == value)
-                        return;
-
-                    strValue = value;
-                    Value.FromString(strValue);
-                }
-            }
-        }*/
-
         public List<string> DataKeyList = new List<string>();
 
         public void AddVariable(VariableType vt)
@@ -162,6 +136,9 @@ namespace XFlow
                     break;
                 case VariableType.ListFloat:
                     v = new ListFloatVariable();
+                    break;
+                case VariableType.String:
+                    v = new StringVariable();
                     break;
                 default:
                     break;

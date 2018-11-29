@@ -383,7 +383,7 @@ namespace XFlow
 
                 GUILayout.BeginVertical();
 
-                for (int i = blackboard.DataKeyList.Count - 1; i >= 0; i--)
+                for (int i = 0; i < blackboard.DataKeyList.Count; i++)
                 {
                     var name = blackboard.DataKeyList[i];
                     GUILayout.BeginHorizontal();
@@ -392,6 +392,8 @@ namespace XFlow
 
                     string newName = EditorGUILayout.DelayedTextField(name, layoutOptions);
                     bool changedName = TryChangeBlackDataName(name, newName);
+
+                    EditorGUILayout.SelectableLabel(EditorUtils.GetVariableType(v));
 
                     string nowName = changedName ? newName : name;
 
